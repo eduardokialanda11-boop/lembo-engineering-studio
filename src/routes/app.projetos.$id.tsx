@@ -1,21 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft, Info, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { demoProjects, demoParts, demoSteps, demoHistory, demoDims } from "@/lib/demo-data";
-import { Thumb } from "@/components/lembo/Thumb";
+import { demoParts, demoSteps, demoHistory, demoDims } from "@/lib/demo-data";
+import { ProjectImage } from "@/components/lembo/ProjectImage";
+import { useProjects } from "@/components/lembo/ProjectsProvider";
+import { DeleteProjectDialog } from "@/components/lembo/DeleteProjectDialog";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { pageMeta } from "@/lib/page-meta";
 import { StatusBadge } from "@/components/lembo/StatusBadge";
 import { DemoBadge } from "@/components/lembo/DemoBadge";
 import { Prancha } from "@/components/lembo/Prancha";
 import { DimLegend, DimChip } from "@/components/lembo/DimLegend";
 
 export const Route = createFileRoute("/app/projetos/$id")({
-  head: () => ({ meta: [
-    { title: "Projeto — LEMBO" },
-    { name: "description", content: "Prancha técnica 2D, peças identificadas e explicações didáticas do projeto." },
-    { property: "og:title", content: "Projeto — LEMBO" },
-    { property: "og:description", content: "Visualize a prancha técnica 2D e entenda cada detalhe." },
-  ] }),
+  head: () => pageMeta("Detalhes do projeto", "Consulte a referência original e acompanhe a documentação técnica 2D do projeto LEMBO."),
   component: ProjectPage,
 });
 
@@ -30,27 +30,30 @@ const lessons = [
 
 function ProjectPage() {
   const { id } = Route.useParams();
-  const p = demoProjects.find((x) => x.id === id) ?? demoProjects[0]!;
-  const ready = p.id === "exemplo-suporte";
+  const { projects } = useProjects();
+  const [deleting, setDeleting] = useState(false);
+  const p = projects.find((x) => x.id === id);
+  if (!p) return <div className="mx-auto max-w-5xl space-y-4 py-12"><h1 className="text-2xl font-bold text-primary">Projeto indisponível</h1><p className="text-sm text-muted-foreground">Este projeto foi eliminado ou não está disponível nesta sessão temporária.</p><Button asChild variant="outline"><Link to="/app">Voltar ao Dashboard</Link></Button></div>;
+  const ready = p.isExample && p.id === "exemplo-suporte";
   const Empty = () => <div className="rounded-xl border border-dashed bg-card p-10 text-center text-sm text-muted-foreground">Disponível quando a análise deste projeto for concluída.</div>;
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <Link to="/app" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-electric"><ArrowLeft className="h-4 w-4" /> Painel</Link>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg border"><Thumb kind={p.thumb} /></div>
-        <div className="flex-1">
+        <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg border"><ProjectImage project={p} /></div>
+        <div className="min-w-0 flex-1 break-words">
           <div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-bold text-primary sm:text-3xl">{p.name}</h1><StatusBadge status={p.status} /></div>
-          <p className="mt-1 text-sm text-muted-foreground">{p.description} · Criado em {new Date(p.createdAt).toLocaleDateString("pt-BR")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{p.description} · Criado em {new Date(p.createdAt).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</p>
         </div>
-        <div className="self-start"><DemoBadge text="Projeto de exemplo" /></div>
+        <div className="flex flex-wrap items-center gap-2 self-start">{p.isExample && <DemoBadge text="Projeto de exemplo" />}<Button variant="outline" className="text-destructive" onClick={() => setDeleting(true)}><Trash2 />Eliminar projeto</Button></div>
       </div>
 
       <div className="flex items-start gap-2 rounded-lg border border-dim-estimated/30 bg-dim-estimated/5 p-3 text-xs text-primary">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-dim-estimated" />
-        Conteúdo ilustrativo para apresentação da interface. Os dados reais virão da análise do backend.
+        {p.isExample ? "Conteúdo de exemplo, não usar para fabricação." : "Projeto temporário desta sessão. Nenhuma análise técnica foi realizada e nenhum dado foi salvo permanentemente."}
       </div>
 
-      <Tabs defaultValue="prancha">
+      <Tabs defaultValue={p.isExample ? "prancha" : "geral"}>
         <div className="overflow-x-auto"><TabsList>
           <TabsTrigger value="geral">Informações</TabsTrigger>
           <TabsTrigger value="prancha">Prancha 2D</TabsTrigger>
@@ -61,13 +64,14 @@ function ProjectPage() {
         </TabsList></div>
 
         <TabsContent value="geral" className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-xl border bg-card p-4 shadow-card"><h3 className="mb-3 text-sm font-semibold text-primary">Imagem original</h3><div className="aspect-[10/7] overflow-hidden rounded-lg border"><Thumb kind={p.thumb} /></div></div>
+          <div className="rounded-xl border bg-card p-4 shadow-card"><h3 className="mb-3 text-sm font-semibold text-primary">Imagem original</h3><div className="aspect-[10/7] overflow-hidden rounded-lg border"><ProjectImage project={p} /></div></div>
           <div className="space-y-4 rounded-xl border bg-card p-4 shadow-card">
             <h3 className="text-sm font-semibold text-primary">Resultado da análise</h3>
             <dl className="grid grid-cols-2 gap-3 text-sm">
               {!ready ? <p className="col-span-2 text-muted-foreground">Aguardando resultado da análise.</p> : [["Objeto", "Suporte em L com reforço"], ["Peças", `${demoParts.length}`], ["Vistas", "Frontal, lateral, superior"], ["Cotas pendentes", `${demoDims.filter((d) => d.kind === "unknown").length}`]].map(([k, v]) => <div key={k} className="rounded-md bg-muted/60 p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium text-primary">{v}</dd></div>)}
             </dl>
             <DimLegend compact />
+            {!p.isExample && <><h3 className="text-sm font-semibold text-primary">Dimensões informadas (observadas)</h3>{p.dimensions.length ? <dl className="space-y-2">{p.dimensions.map((d, i) => <div key={i} className="flex flex-wrap items-center gap-2 text-sm"><DimChip kind="observed" /><dt className="break-words">{d.label}</dt><dd className="font-mono">{d.value} mm</dd></div>)}</dl> : <p className="text-sm text-muted-foreground">Nenhuma medida informada. Dimensões não determinadas permanecem desconhecidas.</p>}<h3 className="text-sm font-semibold text-primary">Observações adicionais</h3><p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{p.notes || "Nenhuma observação informada."}</p></>}
           </div>
         </TabsContent>
 
@@ -85,13 +89,13 @@ function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="didatica" className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
-          <Accordion type="single" collapsible defaultValue="0" className="rounded-xl border bg-card px-4 shadow-card">
+          {!ready ? <div className="lg:col-span-2"><Empty /></div> : <><Accordion type="single" collapsible defaultValue="0" className="rounded-xl border bg-card px-4 shadow-card">
             {lessons.map((l, i) => <AccordionItem key={l.t} value={String(i)}><AccordionTrigger className="text-left text-primary">{l.t}</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground">{l.d}</AccordionContent></AccordionItem>)}
           </Accordion>
           <div className="space-y-4">
             <div className="rounded-xl border bg-card p-4 shadow-card"><h3 className="mb-3 text-sm font-semibold text-primary">Confiabilidade das medidas</h3><DimLegend /></div>
             <div className="rounded-xl border bg-card p-4 shadow-card"><h3 className="mb-2 text-sm font-semibold text-primary">Função de cada peça</h3><ul className="space-y-2 text-sm">{demoParts.map((x) => <li key={x.id}><span className="font-mono text-electric">{x.code}</span> <b className="text-primary">{x.name}:</b> <span className="text-muted-foreground">{x.fn}</span></li>)}</ul></div>
-          </div>
+          </div></>}
         </TabsContent>
 
         <TabsContent value="montagem" className="mt-4">
@@ -99,9 +103,10 @@ function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="historico" className="mt-4">
-          <ol className="relative ml-3 border-l pl-6">{(ready ? demoHistory : demoHistory.slice(0, 2)).map((h) => <li key={h.date} className="mb-5"><span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-card bg-electric" /><div className="font-mono text-xs text-muted-foreground">{h.date}</div><div className="text-sm text-primary">{h.text}</div></li>)}</ol>
+          <ol className="relative ml-3 border-l pl-6">{(p.isExample ? (ready ? demoHistory : demoHistory.slice(0, 2)) : [{ date: new Date(p.createdAt).toLocaleString("pt-BR"), text: "Projeto criado nesta sessão temporária" }]).map((h) => <li key={h.date} className="mb-5"><span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-card bg-electric" /><div className="font-mono text-xs text-muted-foreground">{h.date}</div><div className="text-sm text-primary">{h.text}</div></li>)}</ol>
         </TabsContent>
       </Tabs>
+      <DeleteProjectDialog project={p} open={deleting} onOpenChange={setDeleting} redirect />
     </div>
   );
 }

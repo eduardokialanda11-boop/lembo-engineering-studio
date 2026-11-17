@@ -13,6 +13,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Acesse a LEMBO e transforme imagens em pranchas técnicas mecânicas 2D." },
       { property: "og:title", content: "Entrar — LEMBO" },
       { property: "og:description", content: "Plataforma de engenharia assistida por IA: da imagem à prancha técnica 2D." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Login,

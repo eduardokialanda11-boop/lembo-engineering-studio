@@ -1,0 +1,15 @@
+import { describe, expect, it } from "vitest";
+import { demoProjects } from "@/lib/demo-data";
+import { filterProjects, projectStats, removeProject, validateImage, validateProjectInput, type LocalProject } from "@/lib/project-state";
+const examples: LocalProject[] = demoProjects.map((p) => ({ ...p, dimensions: [], notes: "", isExample: true }));
+const created: LocalProject = { id: "local-project", name: "Projeto criado", description: "Referência real", createdAt: "2026-11-17", status: "rascunho", imageUrl: "blob:test", isExample: false, dimensions: [{ label: "Largura", value: "120" }], notes: "Confirmar os furos" };
+describe("Projetos temporários", () => {
+  it("atualiza o total ao criar um projeto sem simular análise", () => { expect(projectStats([created, ...examples])).toEqual({ total: 5, analysis: 1, completed: 2 }); expect(created.status).toBe("rascunho"); });
+  it("remove imediatamente um projeto e atualiza os indicadores", () => { const remaining = removeProject(examples, "exemplo-suporte"); expect(remaining.map((p) => p.id)).not.toContain("exemplo-suporte"); expect(projectStats(remaining)).toEqual({ total: 3, analysis: 1, completed: 1 }); });
+  it("informa erro ao tentar eliminar um projeto inexistente", () => { expect(() => removeProject(examples, "missing")).toThrow(); expect(examples).toHaveLength(4); });
+  it("permite um estado vazio depois de eliminar todos os projetos", () => { const empty = examples.reduce((list, p) => removeProject(list, p.id), examples); expect(empty).toEqual([]); expect(projectStats(empty)).toEqual({ total: 0, analysis: 0, completed: 0 }); });
+  it("pesquisa por nome sem distinguir maiúsculas e combina com o status", () => { expect(filterProjects(examples, "  SUPORTE ", "concluido").map((p) => p.id)).toEqual(["exemplo-suporte"]); expect(filterProjects(examples, "SUPORTE", "rascunho")).toEqual([]); });
+  it("aceita os formatos que podem ser exibidos na pré-visualização", () => { for (const [name, type] of [["foto.jpg", "image/jpeg"], ["foto.png", "image/png"], ["foto.webp", "image/webp"], ["foto.bmp", "image/bmp"]] as const) expect(() => validateImage({ name, type })).not.toThrow(); });
+  it("rejeita formatos incompatíveis e conteúdo não declarado como imagem", () => { expect(() => validateImage({ name: "foto.heic", type: "image/heic" })).toThrow(); expect(() => validateImage({ name: "foto.jpg", type: "text/plain" })).toThrow(); });
+  it("exige um nome e medidas completas positivas", () => { expect(() => validateProjectInput(" ", [])).toThrow(); expect(() => validateProjectInput("Suporte", [{ label: "Largura", value: "0" }])).toThrow(); expect(() => validateProjectInput("Suporte", [{ label: "", value: "120" }])).toThrow(); expect(() => validateProjectInput("Suporte", [{ label: "Largura", value: "120" }])).not.toThrow(); });
+});

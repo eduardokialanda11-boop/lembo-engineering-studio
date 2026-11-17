@@ -14,8 +14,12 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as RecuperarSenhaRouteImport } from './routes/recuperar-senha'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAjudaRouteImport } from './routes/app.ajuda'
 import { Route as AppAnaliseRouteImport } from './routes/app.analise'
+import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
+import { Route as AppMeusProjetosRouteImport } from './routes/app.meus-projetos'
 import { Route as AppNovoRouteImport } from './routes/app.novo'
+import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppProjetosIdRouteImport } from './routes/app.projetos.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +47,34 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAjudaRoute = AppAjudaRouteImport.update({
+  id: '/ajuda',
+  path: '/ajuda',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAnaliseRoute = AppAnaliseRouteImport.update({
   id: '/analise',
   path: '/analise',
   getParentRoute: () => AppRoute,
 } as any)
+const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMeusProjetosRoute = AppMeusProjetosRouteImport.update({
+  id: '/meus-projetos',
+  path: '/meus-projetos',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppNovoRoute = AppNovoRouteImport.update({
   id: '/novo',
   path: '/novo',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPerfilRoute = AppPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProjetosIdRoute = AppProjetosIdRouteImport.update({
@@ -64,8 +88,12 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/app/ajuda': typeof AppAjudaRoute
   '/app/analise': typeof AppAnaliseRoute
+  '/app/configuracoes': typeof AppConfiguracoesRoute
+  '/app/meus-projetos': typeof AppMeusProjetosRoute
   '/app/novo': typeof AppNovoRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app/': typeof AppIndexRoute
   '/app/projetos/$id': typeof AppProjetosIdRoute
 }
@@ -73,8 +101,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/app/ajuda': typeof AppAjudaRoute
   '/app/analise': typeof AppAnaliseRoute
+  '/app/configuracoes': typeof AppConfiguracoesRoute
+  '/app/meus-projetos': typeof AppMeusProjetosRoute
   '/app/novo': typeof AppNovoRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app': typeof AppIndexRoute
   '/app/projetos/$id': typeof AppProjetosIdRoute
 }
@@ -84,8 +116,12 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/app/ajuda': typeof AppAjudaRoute
   '/app/analise': typeof AppAnaliseRoute
+  '/app/configuracoes': typeof AppConfiguracoesRoute
+  '/app/meus-projetos': typeof AppMeusProjetosRoute
   '/app/novo': typeof AppNovoRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app/': typeof AppIndexRoute
   '/app/projetos/$id': typeof AppProjetosIdRoute
 }
@@ -96,8 +132,12 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/recuperar-senha'
+    | '/app/ajuda'
     | '/app/analise'
+    | '/app/configuracoes'
+    | '/app/meus-projetos'
     | '/app/novo'
+    | '/app/perfil'
     | '/app/'
     | '/app/projetos/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -105,8 +145,12 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/recuperar-senha'
+    | '/app/ajuda'
     | '/app/analise'
+    | '/app/configuracoes'
+    | '/app/meus-projetos'
     | '/app/novo'
+    | '/app/perfil'
     | '/app'
     | '/app/projetos/$id'
   id:
@@ -115,8 +159,12 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/recuperar-senha'
+    | '/app/ajuda'
     | '/app/analise'
+    | '/app/configuracoes'
+    | '/app/meus-projetos'
     | '/app/novo'
+    | '/app/perfil'
     | '/app/'
     | '/app/projetos/$id'
   fileRoutesById: FileRoutesById
@@ -165,6 +213,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/ajuda': {
+      id: '/app/ajuda'
+      path: '/ajuda'
+      fullPath: '/app/ajuda'
+      preLoaderRoute: typeof AppAjudaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/analise': {
       id: '/app/analise'
       path: '/analise'
@@ -172,11 +227,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnaliseRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/configuracoes': {
+      id: '/app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/app/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/meus-projetos': {
+      id: '/app/meus-projetos'
+      path: '/meus-projetos'
+      fullPath: '/app/meus-projetos'
+      preLoaderRoute: typeof AppMeusProjetosRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/novo': {
       id: '/app/novo'
       path: '/novo'
       fullPath: '/app/novo'
       preLoaderRoute: typeof AppNovoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/perfil': {
+      id: '/app/perfil'
+      path: '/perfil'
+      fullPath: '/app/perfil'
+      preLoaderRoute: typeof AppPerfilRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/projetos/$id': {
@@ -190,15 +266,23 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAjudaRoute: typeof AppAjudaRoute
   AppAnaliseRoute: typeof AppAnaliseRoute
+  AppConfiguracoesRoute: typeof AppConfiguracoesRoute
+  AppMeusProjetosRoute: typeof AppMeusProjetosRoute
   AppNovoRoute: typeof AppNovoRoute
+  AppPerfilRoute: typeof AppPerfilRoute
   AppIndexRoute: typeof AppIndexRoute
   AppProjetosIdRoute: typeof AppProjetosIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAjudaRoute: AppAjudaRoute,
   AppAnaliseRoute: AppAnaliseRoute,
+  AppConfiguracoesRoute: AppConfiguracoesRoute,
+  AppMeusProjetosRoute: AppMeusProjetosRoute,
   AppNovoRoute: AppNovoRoute,
+  AppPerfilRoute: AppPerfilRoute,
   AppIndexRoute: AppIndexRoute,
   AppProjetosIdRoute: AppProjetosIdRoute,
 }

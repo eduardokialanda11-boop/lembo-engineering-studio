@@ -1,12 +1,15 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, PlusCircle, Activity, FolderKanban, LogOut } from "lucide-react";
+import { LayoutDashboard, PlusCircle, FolderKanban, LogOut, CircleHelp, Settings, UserRound } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { LogoMark } from "./Logo";
 
 const items = [
-  { title: "Painel", url: "/app", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/app", icon: LayoutDashboard },
+  { title: "Meus projetos", url: "/app/meus-projetos", icon: FolderKanban },
   { title: "Novo projeto", url: "/app/novo", icon: PlusCircle },
-  { title: "Análise técnica", url: "/app/analise", icon: Activity },
+  { title: "Ajuda", url: "/app/ajuda", icon: CircleHelp },
+  { title: "Configurações", url: "/app/configuracoes", icon: Settings },
+  { title: "Perfil do usuário", url: "/app/perfil", icon: UserRound },
   ] as const;
 
 export function AppSidebar() {
@@ -33,16 +36,11 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((i) => (
                 <SidebarMenuItem key={i.url}>
-                  <SidebarMenuButton asChild isActive={path === i.url} tooltip={i.title}>
+                  <SidebarMenuButton asChild isActive={path === i.url || (i.url === "/app/meus-projetos" && path.startsWith("/app/projetos/"))} tooltip={i.title}>
                     <Link to={i.url}><i.icon /><span>{i.title}</span></Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={path.startsWith("/app/projetos")} tooltip="Projeto de exemplo">
-                  <Link to="/app/projetos/$id" params={{ id: "exemplo-suporte" }}><FolderKanban /><span>Projeto de exemplo</span></Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

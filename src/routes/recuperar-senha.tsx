@@ -12,6 +12,8 @@ export const Route = createFileRoute("/recuperar-senha")({
     { name: "description", content: "Receba um link para redefinir sua senha na LEMBO." },
     { property: "og:title", content: "Recuperar senha — LEMBO" },
     { property: "og:description", content: "Redefina o acesso à sua conta LEMBO." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: () => (
     <AuthShell title="Recuperar senha" subtitle="Enviaremos um link de redefinição para seu e-mail.">

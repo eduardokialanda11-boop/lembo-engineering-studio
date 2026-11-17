@@ -8,6 +8,8 @@ export const Route = createFileRoute("/app/analise")({
     { name: "description", content: "Acompanhe o processamento da imagem e a identificação do objeto." },
     { property: "og:title", content: "Análise técnica — LEMBO" },
     { property: "og:description", content: "Estado do processamento da análise visual da LEMBO." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: Analysis,
 });

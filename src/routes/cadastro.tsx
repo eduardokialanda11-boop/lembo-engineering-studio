@@ -12,6 +12,8 @@ export const Route = createFileRoute("/cadastro")({
     { name: "description", content: "Crie sua conta na LEMBO Visual-to-Engineering." },
     { property: "og:title", content: "Criar conta — LEMBO" },
     { property: "og:description", content: "Cadastre-se e comece a gerar pranchas técnicas 2D." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: () => (
     <AuthShell title="Criar conta" subtitle="Comece a transformar imagens em engenharia.">
