@@ -31,7 +31,7 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
             <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
             <div className="mt-6">{children}</div>
           </div>
-          <p className="mt-4 text-center text-xs text-muted-foreground">A autenticação será conectada ao backend na próxima etapa.</p>
+          <p className="mt-4 text-center text-xs text-muted-foreground">Acesso seguro com a sua conta LEMBO.</p>
         </div>
       </main>
     </div>

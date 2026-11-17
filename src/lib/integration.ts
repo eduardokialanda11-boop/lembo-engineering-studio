@@ -13,7 +13,8 @@ const pending = (feature: string) => async (..._args: unknown[]): Promise<never>
   throw new NotConnectedError(feature);
 };
 
-const ok = <T extends { error: { message: string } | null }>(r: T) => { if (r.error) throw new Error(r.error.message); return r; };
+const ptBR: Record<string, string> = { "Invalid login credentials": "E-mail ou senha incorretos.", "Email not confirmed": "Confirme seu e-mail pelo link enviado antes de entrar.", "User already registered": "Este e-mail já está cadastrado." };
+const ok = <T extends { error: { message: string } | null }>(r: T) => { if (r.error) throw new Error(ptBR[r.error.message] ?? r.error.message); return r; };
 export const auth = {
   signIn: async (email: string, password: string) => ok(await supabase.auth.signInWithPassword({ email, password })),
   signUp: async (name: string, email: string, password: string) => ok(await supabase.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo: window.location.origin } })),
