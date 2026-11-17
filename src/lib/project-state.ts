@@ -11,6 +11,8 @@ export interface LocalProject {
   imageName?: string;
   thumb?: DemoProject["thumb"];
   isExample: boolean;
+  /** Linha real da tabela projects do Supabase. */
+  remote?: boolean;
   dimensions: { label: string; value: string }[];
   notes: string;
 }
@@ -52,4 +54,9 @@ export function validateProjectInput(name: string, dimensions: LocalProject["dim
       throw new Error("Informe o nome e um valor maior que zero para cada medida, ou remova a medida incompleta.");
     }
   }
+}
+/** Converte uma linha real de projects usando só colunas existentes. */
+export function projectFromRow(row: { id: string; title: string; image_url: string; created_at: string | null; status: string | null; reference_measure: string | null }): LocalProject {
+  const map: Record<string, ProjectStatus> = { preliminary: "rascunho", draft: "rascunho", completed: "concluido", done: "concluido", error: "erro", failed: "erro" };
+  return { id: row.id, name: row.title, description: "", createdAt: row.created_at ?? new Date().toISOString(), status: map[row.status ?? "preliminary"] ?? "em_analise", ...(row.image_url ? { imageUrl: row.image_url } : {}), isExample: false, remote: true, dimensions: row.reference_measure ? [{ label: "Medida de referência", value: row.reference_measure }] : [], notes: "" };
 }

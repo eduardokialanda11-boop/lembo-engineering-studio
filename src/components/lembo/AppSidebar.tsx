@@ -1,4 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { auth } from "@/lib/integration";
 import { LayoutDashboard, PlusCircle, FolderKanban, LogOut, CircleHelp, Settings, UserRound } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { LogoMark } from "./Logo";
@@ -14,6 +15,7 @@ const items = [
 
 export function AppSidebar() {
   const { state, isMobile, setOpenMobile } = useSidebar();
+  const navigate = useNavigate();
   const closeMobileMenu = () => { if (isMobile) setOpenMobile(false); };
   const collapsed = state === "collapsed";
   const path = useRouterState({ select: (r) => r.location.pathname });
@@ -47,7 +49,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
-        <SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild tooltip="Sair"><Link to="/" onClick={closeMobileMenu}><LogOut /><span>Sair</span></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
+        <SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild tooltip="Sair"><button type="button" onClick={async () => { closeMobileMenu(); await auth.signOut().catch(() => undefined); navigate({ to: "/", replace: true }); }}><LogOut /><span>Sair</span></button></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

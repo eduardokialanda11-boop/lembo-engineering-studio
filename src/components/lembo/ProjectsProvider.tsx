@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { demoProjects } from "@/lib/demo-data";
-import { removeProject, validateProjectInput, type LocalProject } from "@/lib/project-state";
+import { projectFromRow, removeProject, validateProjectInput, type LocalProject } from "@/lib/project-state";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Notice { id: string; text: string }
 interface ProjectsContextValue {
@@ -26,6 +27,19 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
   const [profileName, setProfileName] = useState("");
   const [compact, setCompact] = useState(false);
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [remote, setRemote] = useState<LocalProject[]>([]);
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      const { data, error } = await supabase.from("projects").select("id,title,image_url,created_at,status,reference_measure").order("created_at", { ascending: false });
+      if (!active) return;
+      if (error) { notify(`Não foi possível carregar os projetos: ${error.message}`); return; }
+      setRemote((data ?? []).map(projectFromRow));
+    };
+    load();
+    const channel = supabase.channel(`projects-${crypto.randomUUID()}`).on("postgres_changes", { event: "*", schema: "public", table: "projects" }, () => { load(); }).subscribe();
+    return () => { active = false; supabase.removeChannel(channel); };
+  }, []);
   useEffect(() => () => { imageUrls.current.forEach((url) => URL.revokeObjectURL(url)); }, []);
   const notify = (text: string) => setNotices((existing) => [{ id: crypto.randomUUID(), text }, ...existing]);
   const update = (next: LocalProject[]) => { currentProjects.current = next; setProjects(next); };
@@ -39,13 +53,14 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     return project;
   };
   const deleteProject = (id: string) => {
+    if (remote.some((item) => item.id === id)) throw new Error("Projetos salvos no Supabase não podem ser eliminados nesta etapa.");
     const project = currentProjects.current.find((item) => item.id === id);
     const next = removeProject(currentProjects.current, id);
     update(next);
     if (project?.imageUrl) { URL.revokeObjectURL(project.imageUrl); imageUrls.current.delete(project.imageUrl); }
     notify(`Projeto “${project?.name}” eliminado desta sessão.`);
   };
-  return <ProjectsContext.Provider value={{ projects, createProject, deleteProject, query, setQuery, profileName, setProfileName, compact, setCompact, notices, clearNotices: () => setNotices([]) }}>{children}</ProjectsContext.Provider>;
+  return <ProjectsContext.Provider value={{ projects: [...remote, ...projects], createProject, deleteProject, query, setQuery, profileName, setProfileName, compact, setCompact, notices, clearNotices: () => setNotices([]) }}>{children}</ProjectsContext.Provider>;
 }
 
 export function useProjects() {

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as RecuperarSenhaRouteImport } from './routes/recuperar-senha'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppAjudaRouteImport } from './routes/app.ajuda'
 import { Route as AppAnaliseRouteImport } from './routes/app.analise'
@@ -40,6 +41,11 @@ const CadastroRoute = CadastroRouteImport.update({
 const RecuperarSenhaRoute = RecuperarSenhaRouteImport.update({
   id: '/recuperar-senha',
   path: '/recuperar-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/ajuda': typeof AppAjudaRoute
   '/app/analise': typeof AppAnaliseRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/ajuda': typeof AppAjudaRoute
   '/app/analise': typeof AppAnaliseRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
   '/app/ajuda': typeof AppAjudaRoute
   '/app/analise': typeof AppAnaliseRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/recuperar-senha'
+    | '/redefinir-senha'
     | '/app/ajuda'
     | '/app/analise'
     | '/app/configuracoes'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/recuperar-senha'
+    | '/redefinir-senha'
     | '/app/ajuda'
     | '/app/analise'
     | '/app/configuracoes'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/recuperar-senha'
+    | '/redefinir-senha'
     | '/app/ajuda'
     | '/app/analise'
     | '/app/configuracoes'
@@ -174,6 +186,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   CadastroRoute: typeof CadastroRoute
   RecuperarSenhaRoute: typeof RecuperarSenhaRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       path: '/recuperar-senha'
       fullPath: '/recuperar-senha'
       preLoaderRoute: typeof RecuperarSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -294,6 +314,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   CadastroRoute: CadastroRoute,
   RecuperarSenhaRoute: RecuperarSenhaRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

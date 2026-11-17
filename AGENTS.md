@@ -30,7 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Project rules
-- Backend calls go only through `src/lib/integration.ts` stubs until the existing Supabase backend (projects, components, assembly_steps, Storage, Edge Functions) is integrated — never invent fields or contracts.
+- Auth and backend calls go through `src/lib/integration.ts`; dashboard reads real `projects` rows (RLS, realtime) in ProjectsProvider using only existing columns — never invent fields.
 - Demo content lives only in `src/lib/demo-data.ts` and must always be shown with a visible "exemplo" badge.
 - Brand logo comes from the original uploaded asset pointers in `src/assets/`; never redraw or recolor it.
 - Keep temporary frontend projects in an app-layout React provider, without browser persistence or backend calls, so navigation stays synchronized and reload discards the session.

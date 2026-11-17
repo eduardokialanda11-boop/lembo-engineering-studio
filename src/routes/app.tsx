@@ -1,4 +1,5 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 import { Plus, Search, Bell, UserRound, Info } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/lembo/AppSidebar";
@@ -8,7 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
-export const Route = createFileRoute("/app")({ component: AppLayout });
+export const Route = createFileRoute("/app")({
+  ssr: false,
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/" });
+  },
+  component: AppLayout,
+});
 
 function AppLayout() {
   return <ProjectsProvider><AppShell /></ProjectsProvider>;
@@ -32,7 +40,7 @@ function AppShell() {
             </div>
             <div className="relative order-last w-full md:hidden"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label="Pesquisa global de projetos" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Pesquisar projetos..." className="pl-9" /></div>
           </header>
-          <div className="flex items-start gap-2 border-b bg-secondary/50 px-4 py-2 text-xs text-muted-foreground sm:px-6"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" /><p>Sessão temporária. Projetos não são salvos permanentemente; recarregar a página restaura os exemplos.</p></div>
+          <div className="flex items-start gap-2 border-b bg-secondary/50 px-4 py-2 text-xs text-muted-foreground sm:px-6"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" /><p>Os projetos da sua conta vêm do Supabase e atualizam em tempo real. Exemplos e projetos criados aqui ainda são temporários.</p></div>
           <main className="flex-1 p-4 sm:p-6 lg:p-8"><Outlet /></main>
         </div>
       </div>
