@@ -13,13 +13,14 @@ const items = [
   ] as const;
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
+  const closeMobileMenu = () => { if (isMobile) setOpenMobile(false); };
   const collapsed = state === "collapsed";
   const path = useRouterState({ select: (r) => r.location.pathname });
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/app" className="flex items-center gap-3 px-1 py-2">
+        <Link to="/app" onClick={closeMobileMenu} className="flex items-center gap-3 px-1 py-2">
           <LogoMark className="w-9" />
           {!collapsed && (
             <div className="leading-none">
@@ -37,7 +38,7 @@ export function AppSidebar() {
               {items.map((i) => (
                 <SidebarMenuItem key={i.url}>
                   <SidebarMenuButton asChild isActive={path === i.url || (i.url === "/app/meus-projetos" && path.startsWith("/app/projetos/"))} tooltip={i.title}>
-                    <Link to={i.url}><i.icon /><span>{i.title}</span></Link>
+                    <Link to={i.url} onClick={closeMobileMenu}><i.icon /><span>{i.title}</span></Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -46,7 +47,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
-        <SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild tooltip="Sair"><Link to="/"><LogOut /><span>Sair</span></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
+        <SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild tooltip="Sair"><Link to="/" onClick={closeMobileMenu}><LogOut /><span>Sair</span></Link></SidebarMenuButton></SidebarMenuItem></SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );
