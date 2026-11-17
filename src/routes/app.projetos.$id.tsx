@@ -31,6 +31,8 @@ const lessons = [
 function ProjectPage() {
   const { id } = Route.useParams();
   const p = demoProjects.find((x) => x.id === id) ?? demoProjects[0]!;
+  const ready = p.id === "exemplo-suporte";
+  const Empty = () => <div className="rounded-xl border border-dashed bg-card p-10 text-center text-sm text-muted-foreground">Disponível quando a análise deste projeto for concluída.</div>;
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <Link to="/app" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-electric"><ArrowLeft className="h-4 w-4" /> Painel</Link>
@@ -40,7 +42,7 @@ function ProjectPage() {
           <div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-bold text-primary sm:text-3xl">{p.name}</h1><StatusBadge status={p.status} /></div>
           <p className="mt-1 text-sm text-muted-foreground">{p.description} · Criado em {new Date(p.createdAt).toLocaleDateString("pt-BR")}</p>
         </div>
-        <DemoBadge text="Projeto de exemplo" />
+        <div className="self-start"><DemoBadge text="Projeto de exemplo" /></div>
       </div>
 
       <div className="flex items-start gap-2 rounded-lg border border-dim-estimated/30 bg-dim-estimated/5 p-3 text-xs text-primary">
@@ -63,16 +65,17 @@ function ProjectPage() {
           <div className="space-y-4 rounded-xl border bg-card p-4 shadow-card">
             <h3 className="text-sm font-semibold text-primary">Resultado da análise</h3>
             <dl className="grid grid-cols-2 gap-3 text-sm">
-              {[["Objeto", "Suporte em L com reforço"], ["Peças", `${demoParts.length}`], ["Vistas", "Frontal, lateral, superior"], ["Cotas pendentes", `${demoDims.filter((d) => d.kind === "unknown").length}`]].map(([k, v]) => <div key={k} className="rounded-md bg-muted/60 p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium text-primary">{v}</dd></div>)}
+              {!ready ? <p className="col-span-2 text-muted-foreground">Aguardando resultado da análise.</p> : [["Objeto", "Suporte em L com reforço"], ["Peças", `${demoParts.length}`], ["Vistas", "Frontal, lateral, superior"], ["Cotas pendentes", `${demoDims.filter((d) => d.kind === "unknown").length}`]].map(([k, v]) => <div key={k} className="rounded-md bg-muted/60 p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium text-primary">{v}</dd></div>)}
             </dl>
             <DimLegend compact />
           </div>
         </TabsContent>
 
-        <TabsContent value="prancha" className="mt-4"><Prancha projectName={p.name} /></TabsContent>
+        <TabsContent value="prancha" className="mt-4">{ready ? <Prancha projectName={p.name} /> : <Empty />}</TabsContent>
 
         <TabsContent value="pecas" className="mt-4 grid gap-3 sm:grid-cols-2">
-          {demoParts.map((x) => (
+          {!ready && <div className="col-span-full"><Empty /></div>}
+          {ready && demoParts.map((x) => (
             <div key={x.id} className="rounded-xl border bg-card p-4 shadow-card">
               <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-full border-2 border-primary font-mono text-xs font-bold text-primary">{x.code}</span><span className="font-semibold text-primary">{x.name}</span></div>
               <p className="mt-2 text-sm text-muted-foreground">{x.fn}</p>
@@ -92,11 +95,11 @@ function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="montagem" className="mt-4">
-          <ol className="space-y-3">{demoSteps.map((s, i) => <li key={i} className="flex gap-4 rounded-xl border bg-card p-4 shadow-card"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary font-mono text-sm font-bold text-primary-foreground">{i + 1}</span><p className="pt-1.5 text-sm text-primary">{s}</p></li>)}</ol>
+          {!ready && <Empty />}<ol className="space-y-3">{ready && demoSteps.map((s, i) => <li key={i} className="flex gap-4 rounded-xl border bg-card p-4 shadow-card"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary font-mono text-sm font-bold text-primary-foreground">{i + 1}</span><p className="pt-1.5 text-sm text-primary">{s}</p></li>)}</ol>
         </TabsContent>
 
         <TabsContent value="historico" className="mt-4">
-          <ol className="relative ml-3 border-l pl-6">{demoHistory.map((h) => <li key={h.date} className="mb-5"><span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-card bg-electric" /><div className="font-mono text-xs text-muted-foreground">{h.date}</div><div className="text-sm text-primary">{h.text}</div></li>)}</ol>
+          <ol className="relative ml-3 border-l pl-6">{(ready ? demoHistory : demoHistory.slice(0, 2)).map((h) => <li key={h.date} className="mb-5"><span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-card bg-electric" /><div className="font-mono text-xs text-muted-foreground">{h.date}</div><div className="text-sm text-primary">{h.text}</div></li>)}</ol>
         </TabsContent>
       </Tabs>
     </div>
