@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Backend calls go only through `src/lib/integration.ts` stubs until the existing Supabase backend (projects, components, assembly_steps, Storage, Edge Functions) is integrated — never invent fields or contracts.
+- Demo content lives only in `src/lib/demo-data.ts` and must always be shown with a visible "exemplo" badge.
+- Brand logo comes from the original uploaded asset pointers in `src/assets/`; never redraw or recolor it.

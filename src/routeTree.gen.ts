@@ -10,33 +10,122 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as RecuperarSenhaRouteImport } from './routes/recuperar-senha'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAnaliseRouteImport } from './routes/app.analise'
+import { Route as AppNovoRouteImport } from './routes/app.novo'
+import { Route as AppProjetosIdRouteImport } from './routes/app.projetos.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecuperarSenhaRoute = RecuperarSenhaRouteImport.update({
+  id: '/recuperar-senha',
+  path: '/recuperar-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnaliseRoute = AppAnaliseRouteImport.update({
+  id: '/analise',
+  path: '/analise',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNovoRoute = AppNovoRouteImport.update({
+  id: '/novo',
+  path: '/novo',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjetosIdRoute = AppProjetosIdRouteImport.update({
+  id: '/projetos/$id',
+  path: '/projetos/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/cadastro': typeof CadastroRoute
+  '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/app/analise': typeof AppAnaliseRoute
+  '/app/novo': typeof AppNovoRoute
+  '/app/': typeof AppIndexRoute
+  '/app/projetos/$id': typeof AppProjetosIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cadastro': typeof CadastroRoute
+  '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/app/analise': typeof AppAnaliseRoute
+  '/app/novo': typeof AppNovoRoute
+  '/app': typeof AppIndexRoute
+  '/app/projetos/$id': typeof AppProjetosIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/cadastro': typeof CadastroRoute
+  '/recuperar-senha': typeof RecuperarSenhaRoute
+  '/app/analise': typeof AppAnaliseRoute
+  '/app/novo': typeof AppNovoRoute
+  '/app/': typeof AppIndexRoute
+  '/app/projetos/$id': typeof AppProjetosIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/cadastro'
+    | '/recuperar-senha'
+    | '/app/analise'
+    | '/app/novo'
+    | '/app/'
+    | '/app/projetos/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/cadastro'
+    | '/recuperar-senha'
+    | '/app/analise'
+    | '/app/novo'
+    | '/app'
+    | '/app/projetos/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/cadastro'
+    | '/recuperar-senha'
+    | '/app/analise'
+    | '/app/novo'
+    | '/app/'
+    | '/app/projetos/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  CadastroRoute: typeof CadastroRoute
+  RecuperarSenhaRoute: typeof RecuperarSenhaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +137,79 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recuperar-senha': {
+      id: '/recuperar-senha'
+      path: '/recuperar-senha'
+      fullPath: '/recuperar-senha'
+      preLoaderRoute: typeof RecuperarSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/analise': {
+      id: '/app/analise'
+      path: '/analise'
+      fullPath: '/app/analise'
+      preLoaderRoute: typeof AppAnaliseRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/novo': {
+      id: '/app/novo'
+      path: '/novo'
+      fullPath: '/app/novo'
+      preLoaderRoute: typeof AppNovoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/projetos/$id': {
+      id: '/app/projetos/$id'
+      path: '/projetos/$id'
+      fullPath: '/app/projetos/$id'
+      preLoaderRoute: typeof AppProjetosIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAnaliseRoute: typeof AppAnaliseRoute
+  AppNovoRoute: typeof AppNovoRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppProjetosIdRoute: typeof AppProjetosIdRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAnaliseRoute: AppAnaliseRoute,
+  AppNovoRoute: AppNovoRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppProjetosIdRoute: AppProjetosIdRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  CadastroRoute: CadastroRoute,
+  RecuperarSenhaRoute: RecuperarSenhaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
