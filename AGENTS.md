@@ -35,4 +35,6 @@ use the editor.
 - Brand logo comes from the original uploaded asset pointers in `src/assets/`; never redraw or recolor it.
 - Keep temporary frontend projects in an app-layout React provider, without browser persistence or backend calls, so navigation stays synchronized and reload discards the session.
 - Own project image object URLs in the shared provider after creation and revoke them on deletion or unmount to preserve previews without leaking memory.
-- Project-detail stage access is centralized in project-workflow; a backend status alone never unlocks technical results, and the analysis integration stays pending until the existing deployed contract is verified.
+- Project-detail stage access is centralized in project-workflow; real component and assembly tabs query RLS-protected rows independently of status, but a status alone never unlocks a technical drawing.
+- Route all data calls through integration.ts and paginate lists; account views never seed demo rows, and private project images use renewable signed URLs because the existing bucket is private.
+- Keep analysis drafts in memory with the original File; do not invoke dynamic-action, upload or pre-insert for analysis until its deployed input/output and upload ownership are verified, to avoid duplicate persistence.

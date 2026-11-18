@@ -62,7 +62,7 @@ function Analysis() {
           </ol>
           <div className="mt-5 flex flex-wrap gap-2">
             <Button asChild variant="outline"><Link to="/app/novo">Voltar</Link></Button>
-            <Button asChild variant="electric"><Link to="/app/projetos/$id" params={{ id: "exemplo-suporte" }}>Ver projeto de exemplo</Link></Button>
+            <Button asChild variant="electric"><Link to="/app/meus-projetos">Meus projetos</Link></Button>
           </div>
         </div>
       </div>

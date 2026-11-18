@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { demoProjects } from "@/lib/demo-data";
+import { projectsApi } from "@/lib/integration";
 import { projectFromRow, removeProject, validateProjectInput, type LocalProject } from "@/lib/project-state";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,11 +16,15 @@ interface ProjectsContextValue {
   setCompact: (value: boolean) => void;
   notices: Notice[];
   clearNotices: () => void;
+  loading: boolean;
+  loadError: string;
+  refreshProjects: () => Promise<void>;
+  loadProject: (id: string) => Promise<LocalProject | null>;
 }
 const ProjectsContext = createContext<ProjectsContextValue | null>(null);
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<LocalProject[]>(() => demoProjects.map((project) => ({ ...project, isExample: true, dimensions: [], notes: "" })));
+  const [projects, setProjects] = useState<LocalProject[]>([]);
   const currentProjects = useRef(projects);
   const imageUrls = useRef(new Set<string>());
   const [query, setQuery] = useState("");
@@ -28,17 +32,37 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
   const [compact, setCompact] = useState(false);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [remote, setRemote] = useState<LocalProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const mounted = useRef(true);
+  const generation = useRef(0);
+  const refreshProjects = async () => {
+    const request = ++generation.current;
+    setLoading(true); setLoadError("");
+    try {
+      const rows = await projectsApi.list();
+      if (mounted.current && request === generation.current) setRemote(rows.map(projectFromRow));
+    } catch (error) {
+      if (mounted.current && request === generation.current) setLoadError(error instanceof Error ? error.message : "Não foi possível carregar os projetos.");
+    } finally { if (mounted.current && request === generation.current) setLoading(false); }
+  };
+  const loadProject = async (id: string) => {
+    const local = currentProjects.current.find((project) => project.id === id);
+    if (local) return local;
+    const row = await projectsApi.get(id);
+    if (!row) return null;
+    const project = projectFromRow(row);
+    if (mounted.current) setRemote((rows) => [project, ...rows.filter((item) => item.id !== id)]);
+    return project;
+  };
   useEffect(() => {
-    let active = true;
-    const load = async () => {
-      const { data, error } = await supabase.from("projects").select("id,title,image_url,created_at,status,reference_measure").order("created_at", { ascending: false });
-      if (!active) return;
-      if (error) { notify(`Não foi possível carregar os projetos: ${error.message}`); return; }
-      setRemote((data ?? []).map(projectFromRow));
-    };
-    load();
-    const channel = supabase.channel(`projects-${crypto.randomUUID()}`).on("postgres_changes", { event: "*", schema: "public", table: "projects" }, () => { load(); }).subscribe();
-    return () => { active = false; supabase.removeChannel(channel); };
+    mounted.current = true;
+    void refreshProjects();
+    const channel = supabase.channel(`projects-${crypto.randomUUID()}`).on("postgres_changes", { event: "*", schema: "public", table: "projects" }, () => { void refreshProjects(); }).subscribe((status) => {
+      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setLoadError("A atualização em tempo real foi interrompida. Tente carregar os projetos novamente.");
+    });
+    const timer = setInterval(() => { void refreshProjects(); }, 50 * 60 * 1000);
+    return () => { mounted.current = false; clearInterval(timer); supabase.removeChannel(channel); };
   }, []);
   useEffect(() => () => { imageUrls.current.forEach((url) => URL.revokeObjectURL(url)); }, []);
   const notify = (text: string) => setNotices((existing) => [{ id: crypto.randomUUID(), text }, ...existing]);
@@ -60,7 +84,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     if (project?.imageUrl) { URL.revokeObjectURL(project.imageUrl); imageUrls.current.delete(project.imageUrl); }
     notify(`Projeto “${project?.name}” eliminado desta sessão.`);
   };
-  return <ProjectsContext.Provider value={{ projects: [...remote, ...projects], createProject, deleteProject, query, setQuery, profileName, setProfileName, compact, setCompact, notices, clearNotices: () => setNotices([]) }}>{children}</ProjectsContext.Provider>;
+  return <ProjectsContext.Provider value={{ projects: [...remote, ...projects], createProject, deleteProject, query, setQuery, profileName, setProfileName, compact, setCompact, notices, loading, loadError, refreshProjects, loadProject, clearNotices: () => setNotices([]) }}>{children}</ProjectsContext.Provider>;
 }
 
 export function useProjects() {

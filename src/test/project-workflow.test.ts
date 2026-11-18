@@ -19,7 +19,8 @@ describe("Regras de navegação e análise do projeto", () => {
   it("um status concluído sem resultado real não libera os resultados", () => {
     const completed = { ...project, remote: true, status: "concluido" as const };
     expect(analysisState(completed)).toBe("waiting");
-    for (const stage of ["prancha", "pecas", "didatica", "montagem"]) expect(canOpenStage(completed, stage)).toBe(false);
+    expect(canOpenStage(completed, "prancha")).toBe(false);
+    for (const stage of ["pecas", "didatica", "montagem"]) expect(canOpenStage(completed, stage)).toBe(true);
     expect(canOpenStage(completed, "analise")).toBe(true);
     expect(canOpenStage(completed, "historico")).toBe(true);
   });

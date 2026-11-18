@@ -1,4 +1,8 @@
 # LEMBO — Gestão de projetos
+- [x] Implementar APIs de consulta, rascunho independente e Storage existentes; retirar exemplos automáticos da conta e mostrar erros com nova tentativa. Escritas ainda não exercitadas na conta real.
+- [x] Conectar componentes e montagem a consultas reais, com estados vazios e nova tentativa, sem substituir dados por exemplos.
+- [ ] Conectar dynamic-action sem duplicar registros: aguarda código atual sem segredos para comprovar entrada, saída e responsabilidade do upload.
+- [x] Executar testes e documentar integrações, campos e limitações comprovadas: 42 testes passaram; acesso autenticado indisponível no Supabase externo.
 - [x] Compartilhar projetos temporários entre painel, lista e detalhes.
 - [x] Criar projetos com imagem validada, medidas e observações.
 - [x] Excluir com confirmação, atualização dos indicadores e redirecionamento.

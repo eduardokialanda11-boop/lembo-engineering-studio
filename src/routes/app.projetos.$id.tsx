@@ -7,7 +7,8 @@ import { ProjectImage } from "@/components/lembo/ProjectImage";
 import { useProjects } from "@/components/lembo/ProjectsProvider";
 import { DeleteProjectDialog } from "@/components/lembo/DeleteProjectDialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { RealProjectResults } from "@/components/lembo/RealProjectResults";
 import { pageMeta } from "@/lib/page-meta";
 import { StatusBadge } from "@/components/lembo/StatusBadge";
 import { DemoBadge } from "@/components/lembo/DemoBadge";
@@ -32,11 +33,22 @@ const lessons = [
 
 export function ProjectPage() {
   const { id } = Route.useParams();
-  const { projects } = useProjects();
+  const { projects, loading, loadProject } = useProjects();
   const [deleting, setDeleting] = useState(false);
   const [selection, setSelection] = useState<{ projectId: string; stage: ProjectStage } | null>(null);
   const p = projects.find((x) => x.id === id);
-  if (!p) return <div className="mx-auto max-w-5xl space-y-4 py-12"><h1 className="text-2xl font-bold text-primary">Projeto indisponível</h1><p className="text-sm text-muted-foreground">Este projeto foi eliminado ou não está disponível nesta sessão temporária.</p><Button asChild variant="outline"><Link to="/app">Voltar ao Dashboard</Link></Button></div>;
+  const [fetchError, setFetchError] = useState("");
+  const [fetching, setFetching] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    if (!loadProject || p) return;
+    let active = true;
+    setFetching(true); setFetchError("");
+    loadProject(id).catch((reason) => { if (active) setFetchError(reason instanceof Error ? reason.message : "Não foi possível buscar o projeto."); }).finally(() => { if (active) setFetching(false); });
+    return () => { active = false; };
+  }, [id, Boolean(p), attempt]);
+  if (!p && (loading || fetching)) return <p role="status">Carregando projeto...</p>;
+  if (!p) return <div className="mx-auto max-w-5xl space-y-4 py-12"><h1 className="text-2xl font-bold text-primary">Projeto indisponível</h1><p role={fetchError ? "alert" : undefined} className="text-sm text-muted-foreground">{fetchError || "Este projeto não existe, foi eliminado ou não pertence à sua conta."}</p>{fetchError && <Button variant="outline" onClick={() => setAttempt((value) => value + 1)}>Tentar novamente</Button>}<Button asChild variant="outline"><Link to="/app">Voltar ao Dashboard</Link></Button></div>;
   const ready = hasExampleResults(p);
   const selected = selection?.projectId === id ? selection.stage : "geral";
   const stage = canOpenStage(p, selected) ? selected : "analise";
@@ -96,13 +108,12 @@ export function ProjectPage() {
           </div>
           <DimLegend compact />
           {!ready && <p className="text-sm text-muted-foreground">Prancha, peças, explicações e montagem permanecem pendentes.</p>}
-          {!ready && <Button asChild variant="outline"><Link to="/app/projetos/$id" params={{ id: "exemplo-suporte" }}>Ver projeto de exemplo</Link></Button>}
         </TabsContent>
 
         <TabsContent value="prancha" className="mt-4">{ready ? <Prancha projectName={p.name} /> : <Empty />}</TabsContent>
 
         <TabsContent value="pecas" className="mt-4 grid gap-3 sm:grid-cols-2">
-          {!ready && <div className="col-span-full"><Empty /></div>}
+          {p.remote ? <div className="col-span-full"><RealProjectResults projectId={p.id} kind="pieces" /></div> : !ready && <div className="col-span-full"><Empty /></div>}
           {ready && demoParts.map((x) => (
             <div key={x.id} className="rounded-xl border bg-card p-4 shadow-card">
               <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-full border-2 border-primary font-mono text-xs font-bold text-primary">{x.code}</span><span className="font-semibold text-primary">{x.name}</span></div>
@@ -113,7 +124,7 @@ export function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="didatica" className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
-          {!ready ? <div className="lg:col-span-2"><Empty /></div> : <><Accordion type="single" collapsible defaultValue="0" className="rounded-xl border bg-card px-4 shadow-card">
+          {p.remote ? <div className="lg:col-span-2"><RealProjectResults projectId={p.id} kind="explanation" /></div> : !ready ? <div className="lg:col-span-2"><Empty /></div> : <><Accordion type="single" collapsible defaultValue="0" className="rounded-xl border bg-card px-4 shadow-card">
             {lessons.map((l, i) => <AccordionItem key={l.t} value={String(i)}><AccordionTrigger className="text-left text-primary">{l.t}</AccordionTrigger><AccordionContent className="text-sm text-muted-foreground">{l.d}</AccordionContent></AccordionItem>)}
           </Accordion>
           <div className="space-y-4">
@@ -123,7 +134,7 @@ export function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="montagem" className="mt-4">
-          {!ready && <Empty />}<ol className="space-y-3">{ready && demoSteps.map((s, i) => <li key={i} className="flex gap-4 rounded-xl border bg-card p-4 shadow-card"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary font-mono text-sm font-bold text-primary-foreground">{i + 1}</span><p className="pt-1.5 text-sm text-primary">{s}</p></li>)}</ol>
+          {p.remote ? <RealProjectResults projectId={p.id} kind="assembly" /> : !ready && <Empty />}<ol className="space-y-3">{ready && demoSteps.map((s, i) => <li key={i} className="flex gap-4 rounded-xl border bg-card p-4 shadow-card"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary font-mono text-sm font-bold text-primary-foreground">{i + 1}</span><p className="pt-1.5 text-sm text-primary">{s}</p></li>)}</ol>
         </TabsContent>
 
         <TabsContent value="historico" className="mt-4">

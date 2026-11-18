@@ -29,7 +29,7 @@ export function analysisState(project: LocalProject): AnalysisState {
 
 export function canOpenStage(project: LocalProject, stage: string): stage is ProjectStage {
   if (!projectStages.some((item) => item.id === stage)) return false;
-  return stage === "geral" || stage === "analise" || stage === "historico" || hasExampleResults(project);
+  return stage === "geral" || stage === "analise" || stage === "historico" || hasExampleResults(project) || (Boolean(project.remote) && ["pecas", "didatica", "montagem"].includes(stage));
 }
 
 export function stageState(project: LocalProject, stage: ProjectStage) {

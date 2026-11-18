@@ -9,6 +9,7 @@ export interface LocalProject {
   status: ProjectStatus;
   imageUrl?: string;
   imageName?: string;
+  originalFile?: File;
   thumb?: DemoProject["thumb"];
   isExample: boolean;
   /** Linha real da tabela projects do Supabase. */

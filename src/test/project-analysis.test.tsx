@@ -1,7 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectAnalysis } from "@/components/lembo/ProjectAnalysis";
-import { NotConnectedError } from "@/lib/integration";
 import type { LocalProject } from "@/lib/project-state";
 const start = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/integration", async (original) => ({ ...await original<typeof import("@/lib/integration")>(), analysisApi: { start } }));
@@ -25,10 +24,10 @@ describe("Início de análise", () => {
     fireEvent.click(button);
     expect(button).toBeDisabled();
     expect(start).toHaveBeenCalledTimes(1);
-    rejectRequest?.(new NotConnectedError("Análise"));
+    rejectRequest?.(new Error("Contrato de análise não confirmado"));
     await waitFor(() => expect(button).toBeEnabled());
     expect(project.status).toBe("rascunho");
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
   it("mantém o botão bloqueado durante processamento já informado pelo Supabase", () => {
     render(<ProjectAnalysis project={{ ...project, remote: true, status: "em_analise" }} />);

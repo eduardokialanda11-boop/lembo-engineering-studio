@@ -44,7 +44,7 @@ function NewProject() {
       validateProjectInput(name, dims);
       locked.current = true; setBusy(true); setError("");
       imageUrl = URL.createObjectURL(file);
-      const project = createProject({ name, description, notes, dimensions: dims, imageUrl, imageName: file.name });
+      const project = createProject({ name, description, notes, dimensions: dims, imageUrl, imageName: file.name, originalFile: file });
       imageUrl = undefined;
       setQuery(""); toast.success("Projeto criado nesta sessão. Os dados são temporários.");
       await nav({ to: "/app/projetos/$id", params: { id: project.id } });

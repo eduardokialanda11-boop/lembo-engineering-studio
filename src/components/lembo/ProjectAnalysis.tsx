@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { CheckCircle2, Clock, LoaderCircle, PlugZap, ScanEye, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { analysisApi, NotConnectedError } from "@/lib/integration";
+import { analysisApi } from "@/lib/integration";
 import type { LocalProject } from "@/lib/project-state";
 import { analysisState, validateAnalysisStart } from "@/lib/project-workflow";
 
@@ -36,12 +36,10 @@ export function ProjectAnalysis({ project, onOpenAnalysis, details = false }: {
       setBusy(true);
       // Only the existing integration point is used. It remains pending until
       // the deployed function and its exact contract can be verified.
-      await analysisApi.start();
+      await analysisApi.start(project.originalFile ? { image: project.originalFile, name: project.name, description: project.description, dimensions: project.dimensions, notes: project.notes } : undefined);
     } catch (error) {
-      setFailed(!(error instanceof NotConnectedError));
-      setMessage(error instanceof NotConnectedError
-        ? "Integração de análise pendente: a função de engenharia e seu formato de envio ainda não puderam ser confirmados. Nenhuma análise foi iniciada."
-        : error instanceof Error ? error.message : "Não foi possível iniciar a análise. Tente novamente mais tarde.");
+      setFailed(true);
+      setMessage(error instanceof Error ? error.message : "Não foi possível iniciar a análise. Tente novamente mais tarde.");
     } finally {
       lock.current = false;
       setBusy(false);
