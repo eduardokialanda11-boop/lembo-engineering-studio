@@ -8,4 +8,5 @@
 - [ ] Confirmar a função existente e seu contrato: bloqueado pela ausência de acesso de leitura às funções publicadas; integração permanece pendente, sem simulação.
 - [x] Organizar etapas, ação de análise e navegação dos detalhes sem liberar resultados inexistentes.
 - [x] Testar os botões, bloqueios e exclusão: 28 testes passaram; acesso protegido conferido em computador e celular.
+- [x] Revisar visualmente em apresentação isolada os quatro exemplos e seis estados de projeto, no computador e celular; conferir etapas, continuidade, retorno, histórico e cancelamento da exclusão sem acessar a conta.
 - [ ] Conferir visualmente os detalhes dentro da conta em computador e celular: sessão autenticada indisponível no Supabase externo.
