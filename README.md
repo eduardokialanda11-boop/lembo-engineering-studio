@@ -1,650 +1,193 @@
-# LEMBO Engineering Studio
+Visual-to-Engineering — Da imagem à fabricação
 
-LEMBO — Visual-to-Engineering
+Plataforma de engenharia assistida por IA que transforma imagens, esboços e desenhos técnicos em projetos estruturados, permitindo definir dimensões, identificar componentes e orientar visualmente a fabricação e a montagem.
 
-
-
-Construção do Frontend da Plataforma
-
-
-
-Crie o frontend de uma plataforma SaaS profissional chamada LEMBO, cujo subtítulo e tecnologia principal são Visual-to-Engineering.
-
-
-
-A LEMBO é uma plataforma de engenharia assistida por inteligência artificial que transforma fotografias, esboços e desenhos técnicos em pranchas profissionais de desenho técnico mecânico 2D, com interpretação didática e orientação para fabricação, montagem e instalação.
-
-
-
-IMPORTANTE SOBRE A MARCA:
-
-
-
-- Nome oficial: LEMBO.
-
-- Subtítulo: Visual-to-Engineering.
-
-- O nome LEMBO deve ter maior destaque na identidade visual.
-
-- Visual-to-Engineering deve aparecer como subtítulo, assinatura ou descrição tecnológica.
-
-- Utilizar obrigatoriamente o logotipo original anexado a esta solicitação.
-
-
-
-Não criar uma nova marca nem substituir o logotipo fornecido.
-
-
+Página pública: https://eduardokialanda11-boop.github.io/visual-to-engineering/
+Repositório: https://github.com/eduardokialanda11-boop/visual-to-engineering
+Hackathon: Hack Brasil 2026 — Logística & Automação
 
 ---
 
+1. O problema
 
+Empresas e profissionais que fabricam, montam, instalam ou fazem manutenção frequentemente recebem apenas uma fotografia, um esboço ou uma referência visual de um produto.
 
-1. IDENTIDADE VISUAL
+Transformar essa referência em um projeto técnico exige identificar componentes, definir dimensões, selecionar materiais, calcular quantidades e planejar as etapas de fabricação.
 
+Esse processo pode ser demorado, depender de trabalho manual e gerar erros quando as informações estão incompletas ou são interpretadas incorretamente.
 
+O problema afeta, entre outros:
 
-Desenvolver uma identidade visual profissional, moderna, tecnológica e industrial.
+- Indústrias e fábricas;
+- Empresas de logística;
+- Construtoras e montadoras;
+- Serralherias e oficinas;
+- Equipes de manutenção;
+- Profissionais de fabricação de estruturas e equipamentos.
 
+2. A solução
 
+O Visual-to-Engineering propõe uma plataforma que conecta a interpretação visual à engenharia e à fabricação.
 
-Utilizar o logotipo original da LEMBO como referência principal.
+O usuário envia uma imagem de um objeto industrial. A plataforma analisa sua estrutura, identifica componentes e organiza as informações necessárias para desenvolver um projeto técnico.
 
+O objetivo não é apenas gerar um desenho: é permitir que o usuário compreenda como o objeto é composto e seja orientado na fabricação e montagem daquele mesmo objeto, desde a primeira etapa até a conclusão.
 
+3. Como funciona
 
-Características que devem orientar o design:
+Etapa 1 — Entrada do objeto
 
+O usuário poderá enviar:
 
+- Fotografias;
+- Esboços feitos à mão;
+- Desenhos técnicos;
+- Imagens de referências industriais.
 
-- Azul-marinho como cor principal.
+Etapa 2 — Interpretação e decomposição
 
-- Azul-claro como cor secundária.
+A IA analisa a imagem e procura identificar:
 
-- Branco e tons neutros para fundos.
+- Estrutura geral;
+- Componentes individuais;
+- Chapas, tubos, perfis e conexões;
+- Quantidade aparente de peças;
+- Geometria e relações entre componentes;
+- Dimensões que possam ser observadas ou calculadas.
 
-- Detalhes em azul elétrico para elementos interativos.
+O objeto será representado digitalmente e poderá ser apresentado em uma visualização desmontada, destacando cada componente.
 
-- Tipografia moderna, elegante e de excelente legibilidade.
+Etapa 3 — Definição e edição das medidas
 
-- Aparência de software profissional de engenharia industrial.
+O usuário terá controle sobre as dimensões do projeto.
 
+Poderá:
 
+- Informar altura, largura e profundidade do objeto;
+- Definir medidas específicas de cada componente;
+- Informar espessuras e outras dimensões relevantes;
+- Corrigir medidas identificadas pela IA;
+- Adicionar dimensões que não aparecem na imagem;
+- Alterar valores e visualizar as consequências no projeto.
 
-Preservar integralmente:
+Quando uma medida não puder ser determinada com segurança, a plataforma deverá solicitar essa informação ao usuário ou identificá-la como pendente.
 
+Etapa 4 — Dois modos de operação
 
+Modo Automático
 
-- O símbolo da engrenagem.
+A plataforma interpreta a imagem, identifica os componentes e organiza o projeto com as informações disponíveis. Quando faltar uma dimensão ou informação essencial, solicita a intervenção do usuário.
 
-- O olho com circuitos eletrónicos.
+Modo Assistido
 
-- As proporções originais.
+O usuário participa diretamente da construção do projeto, respondendo às perguntas da plataforma, definindo medidas, selecionando materiais e corrigindo a interpretação da IA.
 
-- As cores originais.
+Os dois modos utilizarão o mesmo núcleo de engenharia e deverão produzir um projeto estruturado e coerente.
 
-- A composição e a tipografia da marca.
+Etapa 5 — Projeto técnico
 
+A plataforma deverá organizar os resultados em:
 
+- Desenho técnico com cotas;
+- Representação digital do objeto;
+- Vista explodida com identificação dos componentes;
+- Lista de materiais e quantidades;
+- Especificações dimensionais;
+- Informações sobre conexões e montagem;
+- Plano de fabricação;
+- Documentação técnica exportável.
 
-O logotipo deve aparecer:
+Etapa 6 — Orientação visual de fabricação e montagem
 
+Esta é uma das funcionalidades centrais do projeto.
 
+A plataforma deverá orientar o usuário passo a passo na fabricação e montagem do objeto que foi analisado.
 
-- Na tela de autenticação.
+Cada etapa deverá apresentar, conforme aplicável:
 
-- No menu lateral.
+- Qual componente será fabricado ou instalado;
+- Quais são suas dimensões;
+- Qual material deverá ser utilizado;
+- Qual operação deverá ser realizada;
+- Como o componente se conecta às demais peças;
+- Qual é a próxima etapa do processo.
 
-- No painel principal.
+A orientação deverá acompanhar o projeto específico do usuário, e não apresentar apenas instruções genéricas.
 
-- Na identificação da plataforma.
+4. Confiabilidade das informações
 
+O sistema deverá distinguir claramente a origem e o nível de confiança de cada informação:
 
+Classificação| Significado
+Observada| Informação identificada diretamente na imagem ou desenho
+Calculada| Informação obtida por cálculo a partir de dados disponíveis
+Estimada| Valor aproximado que ainda precisa de confirmação
+Informada pelo usuário| Dado inserido manualmente pelo usuário
+Pendente| Informação necessária que ainda não foi definida
+Validada| Informação conferida e aprovada conforme os critérios do projeto
 
-Não utilizar o logotipo como marca-d'água excessiva.
+Uma imagem, isoladamente, não permite determinar com segurança todas as dimensões, materiais, espessuras ou características ocultas de um objeto.
 
+Por isso, a plataforma não deverá apresentar estimativas como medidas confirmadas nem considerar automaticamente um projeto pronto para fabricação.
 
+Projetos que envolvam riscos estruturais, vasos de pressão, reservatórios ou outros equipamentos críticos exigirão verificações técnicas, normas aplicáveis e validação de profissional habilitado.
 
----
+5. Exemplo ilustrativo — Rack industrial
 
+O rack industrial é utilizado como exemplo ilustrativo para demonstrar o funcionamento proposto.
 
+O usuário envia uma imagem do rack e informa as dimensões gerais que conhece. Em seguida, poderá definir ou corrigir as dimensões de cada componente.
 
-2. AUTENTICAÇÃO
+A plataforma deverá organizar a estrutura, identificar suas peças, apresentar uma representação desmontada e atualizar o desenho técnico conforme as medidas fornecidas.
 
+Por fim, deverá orientar visualmente a fabricação e a montagem daquele rack específico.
 
+Observação: este exemplo demonstra o conceito da solução. Não representa um projeto industrial já validado, um produto fabricado ou resultados de testes comprovados.
 
-Criar:
+6. Objetivo do projeto
 
+O objetivo do Visual-to-Engineering é reduzir a distância entre uma referência visual e um processo estruturado de engenharia e fabricação.
 
+A proposta é tornar mais acessível a transformação de imagens em projetos técnicos, oferecendo ao usuário controle sobre as dimensões, compreensão dos componentes e orientação durante a execução.
 
-- Tela de login.
+7. Tecnologias
 
-- Cadastro de usuários.
+Implementação atual do repositório:
 
-- Recuperação de senha.
+- HTML;
+- CSS;
+- JavaScript;
+- GitHub;
+- GitHub Pages.
 
-- Interface de autenticação moderna.
+Tecnologias que poderão integrar a evolução da plataforma:
 
-- Apresentação da marca LEMBO.
+- Inteligência artificial multimodal e visão computacional;
+- Backend em Python;
+- Banco de dados e armazenamento;
+- Ferramentas de modelagem e geometria 3D;
+- Geração de desenhos e arquivos CAD;
+- Exportação de documentação técnica.
 
+As tecnologias futuras representam possibilidades de desenvolvimento, não funcionalidades já implementadas nesta versão estática.
 
+8. Como executar a versão atual
 
-Preparar a estrutura visual para futura integração com a autenticação existente no Supabase.
+A versão atual é uma página estática de apresentação do projeto.
 
+Online:
+Acesse https://eduardokialanda11-boop.github.io/visual-to-engineering/
 
+Localmente:
 
-Não implementar autenticação fictícia.
+1. Baixe ou clone o repositório:
+   "git clone https://github.com/eduardokialanda11-boop/visual-to-engineering.git"
+2. Abra a pasta do projeto.
+3. Abra o arquivo "index.html" em um navegador.
 
+A página de apresentação pode ser aberta localmente, mas isso não significa que o processamento por IA, a modelagem técnica ou a orientação de fabricação já estejam implementados.
 
+9. Equipe
 
----
-
-
-
-3. PAINEL PRINCIPAL — DASHBOARD
-
-
-
-Criar um painel profissional com:
-
-
-
-- Menu lateral de navegação.
-
-- Logotipo LEMBO.
-
-- Subtítulo Visual-to-Engineering.
-
-- Botão destacado "Novo projeto".
-
-- Lista de projetos recentes.
-
-- Pesquisa de projetos.
-
-- Filtros por status.
-
-- Identificação da data de criação.
-
-- Miniatura da imagem original.
-
-- Indicadores de projetos em andamento e concluídos.
-
-
-
-O painel deve transmitir a experiência de uma plataforma industrial profissional.
-
-
-
----
-
-
-
-4. CRIAÇÃO DE PROJETOS
-
-
-
-Criar uma tela para iniciar novos projetos.
-
-
-
-Incluir:
-
-
-
-- Campo para nome do projeto.
-
-- Campo de descrição.
-
-- Área para upload de imagens.
-
-- Suporte a fotografias, esboços e desenhos técnicos.
-
-- Suporte aos formatos de imagem comuns.
-
-- Pré-visualização da imagem carregada.
-
-- Possibilidade de remover ou substituir a imagem.
-
-- Campo para inserir dimensões conhecidas.
-
-- Botão "Analisar projeto".
-
-
-
-A interface deve ser simples e intuitiva.
-
-
-
-O usuário não precisa ter conhecimentos de desenho técnico.
-
-
-
----
-
-
-
-5. ANÁLISE TÉCNICA
-
-
-
-Criar uma tela de processamento que apresente:
-
-
-
-- Imagem original enviada.
-
-- Identificação do objeto.
-
-- Informações identificadas pela análise.
-
-- Estado do processamento.
-
-- Indicadores visuais de progresso.
-
-- Mensagens claras durante o processamento.
-
-
-
-Preparar a interface para receber os resultados reais da inteligência artificial através do backend Supabase.
-
-
-
-Não simular resultados de inteligência artificial como se fossem reais.
-
-
-
----
-
-
-
-6. PRANCHA TÉCNICA 2D
-
-
-
-Esta é uma das áreas mais importantes da plataforma.
-
-
-
-Criar um visualizador profissional de pranchas técnicas mecânicas 2D.
-
-
-
-A prancha deve apresentar:
-
-
-
-- Vista frontal.
-
-- Vista lateral.
-
-- Vista superior.
-
-- Cotas e linhas de dimensão.
-
-- Setas e referências.
-
-- Identificação das peças.
-
-- Legenda técnica.
-
-- Escala.
-
-- Identificação do projeto.
-
-- Organização visual semelhante a uma prancha técnica profissional.
-
-
-
-Incluir recursos de interface para:
-
-
-
-- Ampliar e reduzir a prancha.
-
-- Visualizar detalhes.
-
-- Alternar entre as vistas.
-
-- Selecionar peças.
-
-- Consultar dimensões.
-
-- Exportar a prancha em PDF.
-
-
-
-A representação deve priorizar precisão, clareza e legibilidade.
-
-
-
----
-
-
-
-7. INTERPRETAÇÃO DIDÁTICA
-
-
-
-Criar uma área que explique os desenhos técnicos em linguagem simples.
-
-
-
-O sistema deverá apresentar explicações sobre:
-
-
-
-- O significado de cada vista.
-
-- O que representam as linhas.
-
-- O significado das setas.
-
-- O significado dos símbolos.
-
-- Como interpretar as cotas.
-
-- A função de cada peça.
-
-- Como compreender o desenho técnico.
-
-
-
-O objetivo é permitir que pessoas sem formação em engenharia consigam compreender a prancha.
-
-
-
----
-
-
-
-8. CONFIABILIDADE DAS DIMENSÕES
-
-
-
-Criar uma identificação visual clara para quatro categorias:
-
-
-
-1. Medidas observadas.
-
-2. Medidas calculadas.
-
-3. Medidas estimadas.
-
-4. Medidas desconhecidas.
-
-
-
-Não misturar essas categorias.
-
-
-
-Não apresentar dimensões estimadas como medidas exatas.
-
-
-
-Quando uma dimensão não puder ser determinada, indicar claramente que necessita de confirmação ou informação do usuário.
-
-
-
----
-
-
-
-9. ORGANIZAÇÃO DOS PROJETOS
-
-
-
-Criar uma página individual para cada projeto.
-
-
-
-Incluir:
-
-
-
-- Informações gerais.
-
-- Imagem original.
-
-- Resultado da análise.
-
-- Prancha técnica 2D.
-
-- Vistas disponíveis.
-
-- Peças identificadas.
-
-- Explicações didáticas.
-
-- Etapas de montagem, quando disponíveis.
-
-- Histórico e status do projeto.
-
-
-
-A navegação deve ser intuitiva.
-
-
-
----
-
-
-
-10. EXPERIÊNCIA DO USUÁRIO
-
-
-
-A plataforma deve ser compreensível para:
-
-
-
-- Indústrias e fábricas.
-
-- Construtoras e montadoras.
-
-- Serralherias.
-
-- Oficinas.
-
-- Profissionais de manutenção.
-
-- Pequenos fabricantes.
-
-- Pessoas sem formação técnica.
-
-
-
-O usuário deve conseguir navegar pela plataforma sem precisar conhecer desenho técnico.
-
-
-
-Priorizar uma experiência simples, visual e profissional.
-
-
-
----
-
-
-
-11. REGRAS TÉCNICAS IMPORTANTES
-
-
-
-- Trabalhar exclusivamente com desenhos técnicos 2D.
-
-- Não criar visualizações 3D.
-
-- Não criar quadro de materiais.
-
-- Não inventar dimensões.
-
-- Não apresentar informações técnicas fictícias como resultados reais.
-
-- Não implementar processamento de IA falso.
-
-- Não criar banco de dados novo.
-
-- Não recriar as tabelas existentes.
-
-- Não substituir o backend atual.
-
-- Não modificar as Edge Functions existentes.
-
-- Não alterar políticas RLS.
-
-- Não expor chaves secretas no frontend.
-
-
-
----
-
-
-
-12. ARQUITETURA E PREPARAÇÃO PARA INTEGRAÇÃO
-
-
-
-O backend existente utiliza Supabase.
-
-
-
-A estrutura já possui as tabelas:
-
-
-
-- projects
-
-- components
-
-- assembly_steps
-
-
-
-Também possui Storage e estrutura de Edge Functions.
-
-
-
-O frontend deverá ser desenvolvido considerando essa arquitetura.
-
-
-
-Preparar os pontos de integração para:
-
-
-
-- Autenticação Supabase.
-
-- Criação e consulta de projetos.
-
-- Upload de imagens para Storage.
-
-- Comunicação com as Edge Functions.
-
-- Consulta dos componentes identificados.
-
-- Consulta das etapas de montagem.
-
-- Apresentação dos resultados técnicos.
-
-
-
-Não inventar campos, tabelas ou contratos de API.
-
-
-
-A integração será realizada em uma etapa posterior, após a aprovação da interface.
-
-
-
----
-
-
-
-13. ESCOPO DESTA PRIMEIRA ETAPA
-
-
-
-Nesta primeira entrega, desenvolver somente o frontend:
-
-
-
-1. Identidade visual completa.
-
-2. Navegação.
-
-3. Dashboard.
-
-4. Autenticação visual.
-
-5. Criação de projetos.
-
-6. Upload com pré-visualização.
-
-7. Tela de análise.
-
-8. Visualizador de desenhos técnicos 2D.
-
-9. Área didática.
-
-10. Estrutura de organização dos projetos.
-
-
-
-Utilizar dados demonstrativos apenas para compor a apresentação visual, identificando-os claramente como exemplos.
-
-
-
-Não conectar nem modificar o Supabase nesta primeira etapa.
-
-
-
-Não realizar alterações no backend existente.
-
-
-
----
-
-
-
-RESULTADO ESPERADO
-
-
-
-Entregar uma interface SaaS completa, elegante, responsiva e profissional, com identidade própria da LEMBO.
-
-
-
-A plataforma deve parecer um produto tecnológico real, preparado para uso industrial e apresentação a investidores, empresas e jurados de hackathons.
-
-
-
-A experiência visual deve transmitir três conceitos:
-
-
-
-ENGENHARIA + INTELIGÊNCIA ARTIFICIAL + PRECISÃO.
-
-
-
-A LEMBO não deve parecer um simples aplicativo de upload de imagens. Deve parecer uma verdadeira plataforma de engenharia assistida por inteligência artificial.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/71d74109-ab72-4e31-af97-aadb15a21065).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+Kialanda e Debora
+Hack Brasil 2026 — Logística & Automação
