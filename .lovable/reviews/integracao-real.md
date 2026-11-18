@@ -1,7 +1,7 @@
 # LEMBO — relatório de integração real
 
 ## Resultado e limites
-Implementação parcial, sem alterar design, tabelas, RLS, migrations ou Edge Functions. Não é correto declarar a integração de IA concluída.
+Frontend conectado ao contrato fornecido, sem alterar design, tabelas, RLS, migrations ou Edge Functions. Análise autenticada real permanece não verificada; não se declara funcionamento do modelo hospedado.
 
 ## Arquivos alterados
 - `src/lib/integration.ts`: APIs tipadas e erros reais.
@@ -30,24 +30,40 @@ Implementação parcial, sem alterar design, tabelas, RLS, migrations ou Edge Fu
 - Storage: bucket project-images, privado, políticas por primeira pasta igual ao auth.uid().
 
 ## Contrato de dynamic-action
-Nome informado pelo usuário: dynamic-action. O código não está no repositório; a única migration existente ativa realtime. Não há conexão de gerenciamento disponível e o plano de diagnóstico não atende este Supabase externo. Não foi possível confirmar implantação, entrada, saída, campos processados ou persistidos. Não houve tentativa de adivinhar JSON/multipart nem chamada com dados incompletos.
+Código fornecido pelo usuário. Endpoint real respondeu OPTIONS HTTP 200; isso não verifica POST, secrets, modelo ou persistência.
 
-`analysisApi.start` continua bloqueada com erro explícito (não NotConnectedError). Não chama supabase.functions.invoke enquanto faltar o contrato. Nenhum upload, projeto, componente ou etapa é criado no fluxo de análise. O uso do project_id retornado aguarda comprovação do retorno real; não foi implementado um parser especulativo.
+Entrada JSON: image (data URL Base64; aliases aceitos pela função: imageBase64, image_data) e referenceMeasure (alias reference_measure). JPEG, PNG, WEBP; máximo 8 MiB. Autenticação por bearer da sessão. A função não lê name, description, dimensions, notes nem additionalInstructions como campos separados.
 
-## Metadados
-A sessão mantém imagem original, nome, descrição, dimensões e observações. O tipo de entrada também prevê referência de medida e instruções adicionais. Nada disso é declarado processado ou persistido pela IA. O formulário continua criando apenas uma referência local, claramente identificada como temporária. Não foi conectado um rascunho automático ao banco: dynamic-action já seria responsável pela persistência e pré-inserção pode duplicar o projeto. Rascunho independente e upload têm APIs implementadas, mas não foram adicionados novos comandos visuais fora do escopo.
+Frontend reúne nome, descrição, medidas em mm, referência, observações e instruções adicionais em referenceMeasure, com rótulos explícitos. Acima de 1000 caracteres a operação é recusada antes do envio, pois a função trunca o texto nesse limite. Não há descarte silencioso.
 
-Campos que precisam de atualização posterior na função só podem ser listados após ler seu código. Descrição e observações não têm colunas próprias em projects; não foram inventadas colunas nem uma estrutura de parts_data para escondê-las.
+A função processa imagem e texto de referência no prompt; o título definitivo é produzido pela IA, não necessariamente o nome solicitado. Salva imagem original em project-images; projects recebe id, título produzido, caminho privado, referência textual, análise completa em parts_data, user_id e status preliminary/needs_more_information. Components e assembly_steps são gravados pela função. Frontend não repete nenhum upload ou inserção no fluxo de análise.
+
+Retorno validado: success true, saved_to_database true, project_id UUID, image_path, model, analysis, technical_drawing_svg e persistence (project true e contagens de components/assembly_steps). Erros e resposta incompleta não apresentam sucesso; falhas ambíguas recomendam conferir a lista antes de repetir. POST nunca é repetido automaticamente.
+
+O frontend substitui o rascunho local pelo project_id definitivo e navega para ele. Em recarga, interpreta parts_data com validação do schema. Desenho é renderizado com primitivas SVG validadas, sem injetar HTML do SVG recebido; mantém as quatro classes de medida separadas, zoom, seleção de vistas e impressão/PDF. Arquivos adicionais: analysis-contract.ts, EngineeringDrawing.tsx, analysis-contract.test.ts e fixture de contrato exclusiva dos testes.
+
+## Campos persistidos e limitações
+- Imagem: caminho privado em projects.image_url.
+- Metadados informados: texto conjunto em projects.reference_measure, não colunas separadas.
+- Resultado: object_summary, dimensions, technical_drawing, unknowns, safety_warnings e demais dados em projects.parts_data.
+- Components: name, quantity, description, technical_description, image_emoji, dimensions, order_index e validation_status pending. user_measure, material, measurement_source, manufacturing_process e piece_image_url permanecem nulos segundo o código.
+- Assembly: component_name, title, instruction, visual_type, visual_reference, step_number e step_type assembly. tools_required, safety_notes e estimated_duration_minutes permanecem nulos; avisos gerais ficam em parts_data.safety_warnings.
+- Nome solicitado, descrição, dimensões fornecidas, observações e instruções não são persistidos separadamente. Atualização posterior da função seria necessária para suporte estruturado e preservação literal do nome, ou referência acima de 1000 caracteres. Nenhuma atualização foi realizada nesta etapa.
+- O modelo literal configurado no código é gpt-6.1-terra; sua disponibilidade não foi verificada. Falha do modelo será exibida ao usuário sem simular resultado.
+- A função não fornece progresso intermediário nem idempotência. Não inicia reanálise de projeto com resultado já salvo; erros de conexão exigem conferir a lista antes de repetir.
 
 ## Validação
-- 42 testes passaram em 10 arquivos: acesso sem usuário, consulta por proprietário/ID, consultas de peças e montagem, upload correto e único, formato inválido, falha de tamanho, rascunho independente, erros e nova tentativa, prevenção de envio/duplicação sem contrato, navegação e regras existentes.
+- 52 testes passaram em 11 arquivos: acesso sem usuário, consulta por proprietário/ID, consultas de peças e montagem, upload correto e único, formato inválido, falha de tamanho, rascunho independente, erros e nova tentativa, prevenção de envio/duplicação sem contrato, navegação e regras existentes.
 - Testes de API usam Supabase simulado: comprovam chamadas e regras, não operação real na conta.
 - Banco real: colunas, políticas de acesso e bucket privado inspecionados em consultas somente leitura.
 - Navegador real: /app redireciona para login; identidade visual preservada; nenhum erro de execução observado.
 - Verificação automática mais recente: build OK.
 - Supabase externo sem sessão fornecida: login bem-sucedido, listagem na conta, realtime com alteração real, upload, persistência e recarga autenticada NÃO verificados. Configurações hospedadas de cadastro/login não foram verificadas.
 
+## Verificação adicional no navegador
+Computador 1280x1800 e celular 390x844: fluxo controlado de login, formulário com imagem original e medida, exatamente uma chamada ao contrato, retorno do project_id definitivo, todas as abas de resultado, seleção de todas as vistas e recarga com parts_data. Nenhuma escrita ou upload adicional foi feito pelo frontend; nenhum erro de execução ou rolagem horizontal observado. Respostas interceptadas são exclusivamente um teste, não comprovam a conta ou IA reais. Interface não possui seletor de tema alternativo.
+
 ## Pendências
-1. Enviar código atual de dynamic-action sem segredos para comprovar entrada, saída, upload e persistência; então ligar invoke exatamente à função e navegar pelo project_id confirmado.
-2. Exercitar operações e resultados dentro da conta. Não há sessão gerenciada disponível para este Supabase externo.
-3. Prancha técnica real: nenhum formato comprovado de desenho recebido; não substituída por desenho demonstrativo.
+1. POST autenticado real, OpenAI, upload, persistência e releitura na conta: indisponível sem sessão no Supabase externo; não verificados.
+2. Verificação das configurações hospedadas de auth e disponibilidade do modelo; não foram presumidas a partir do código.
+3. Alterações posteriores na função para suporte estruturado de metadados ou idempotência, se desejadas; nenhuma modificação feita agora.

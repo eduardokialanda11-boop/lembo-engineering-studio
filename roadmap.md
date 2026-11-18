@@ -1,15 +1,15 @@
 # LEMBO — Gestão de projetos
 - [x] Implementar APIs de consulta, rascunho independente e Storage existentes; retirar exemplos automáticos da conta e mostrar erros com nova tentativa. Escritas ainda não exercitadas na conta real.
 - [x] Conectar componentes e montagem a consultas reais, com estados vazios e nova tentativa, sem substituir dados por exemplos.
-- [ ] Conectar dynamic-action sem duplicar registros: aguarda código atual sem segredos para comprovar entrada, saída e responsabilidade do upload.
-- [x] Executar testes e documentar integrações, campos e limitações comprovadas: 42 testes passaram; acesso autenticado indisponível no Supabase externo.
+- [x] Conectar dynamic-action ao contrato fornecido: JSON image em Base64 e referenceMeasure, upload/persistência exclusivos da função, retorno definitivo project_id e desenho real recuperável.
+- [x] Executar testes e documentar integrações, campos e limitações comprovadas: 52 testes passaram; acesso autenticado indisponível no Supabase externo.
 - [x] Compartilhar projetos temporários entre painel, lista e detalhes.
 - [x] Criar projetos com imagem validada, medidas e observações.
 - [x] Excluir com confirmação, atualização dos indicadores e redirecionamento.
 - [x] Consolidar navegação, pesquisa, notificações, perfil, ajuda e configurações.
 - [x] Verificar fluxos e layout no computador, tablet e celular; preservar cadastro.
 - [x] Conferir cada página e todas as abas de cada projeto; corrigir navegação móvel e preservar descrição em cartões compactos.
-- [ ] Confirmar a função existente e seu contrato: bloqueado pela ausência de acesso de leitura às funções publicadas; integração permanece pendente, sem simulação.
+- [x] Confirmar contrato pelo código fornecido: endpoint responde OPTIONS 200; POST autenticado real permanece sem verificação por ausência de sessão.
 - [x] Organizar etapas, ação de análise e navegação dos detalhes sem liberar resultados inexistentes.
 - [x] Testar os botões, bloqueios e exclusão: 28 testes passaram; acesso protegido conferido em computador e celular.
 - [x] Revisar visualmente em apresentação isolada os quatro exemplos e seis estados de projeto, no computador e celular; conferir etapas, continuidade, retorno, histórico e cancelamento da exclusão sem acessar a conta.

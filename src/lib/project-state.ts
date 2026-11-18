@@ -1,4 +1,5 @@
 import type { DemoProject, ProjectStatus } from "./demo-data";
+import { parseSavedAnalysis, type EngineeringAnalysis } from "./analysis-contract";
 
 /** Frontend-only model; not a contract for the existing backend. */
 export interface LocalProject {
@@ -10,6 +11,8 @@ export interface LocalProject {
   imageUrl?: string;
   imageName?: string;
   originalFile?: File;
+  analysis?: EngineeringAnalysis;
+  referenceMeasure?: string;
   thumb?: DemoProject["thumb"];
   isExample: boolean;
   /** Linha real da tabela projects do Supabase. */
@@ -57,7 +60,8 @@ export function validateProjectInput(name: string, dimensions: LocalProject["dim
   }
 }
 /** Converte uma linha real de projects usando só colunas existentes. */
-export function projectFromRow(row: { id: string; title: string; image_url: string; created_at: string | null; status: string | null; reference_measure: string | null }): LocalProject {
-  const map: Record<string, ProjectStatus> = { preliminary: "rascunho", draft: "rascunho", completed: "concluido", done: "concluido", error: "erro", failed: "erro" };
-  return { id: row.id, name: row.title, description: "", createdAt: row.created_at ?? new Date().toISOString(), status: map[row.status ?? "preliminary"] ?? "em_analise", ...(row.image_url ? { imageUrl: row.image_url } : {}), isExample: false, remote: true, dimensions: row.reference_measure ? [{ label: "Medida de referência", value: row.reference_measure }] : [], notes: "" };
+export function projectFromRow(row: { id: string; title: string; image_url: string; created_at: string | null; status: string | null; reference_measure: string | null; parts_data?: unknown }): LocalProject {
+  const analysis = parseSavedAnalysis(row.parts_data);
+  const map: Record<string, ProjectStatus> = { preliminary: "rascunho", needs_more_information: "rascunho", draft: "rascunho", completed: "concluido", done: "concluido", error: "erro", failed: "erro" };
+  return { id: row.id, name: row.title, description: analysis?.object_summary ?? "", createdAt: row.created_at ?? new Date().toISOString(), status: map[row.status ?? "preliminary"] ?? "em_analise", ...(row.image_url ? { imageUrl: row.image_url } : {}), ...(analysis ? { analysis } : {}), ...(row.reference_measure ? { referenceMeasure: row.reference_measure } : {}), isExample: false, remote: true, dimensions: [], notes: "" };
 }

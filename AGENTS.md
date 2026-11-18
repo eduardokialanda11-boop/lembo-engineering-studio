@@ -37,4 +37,5 @@ use the editor.
 - Own project image object URLs in the shared provider after creation and revoke them on deletion or unmount to preserve previews without leaking memory.
 - Project-detail stage access is centralized in project-workflow; real component and assembly tabs query RLS-protected rows independently of status, but a status alone never unlocks a technical drawing.
 - Route all data calls through integration.ts and paginate lists; account views never seed demo rows, and private project images use renewable signed URLs because the existing bucket is private.
-- Keep analysis drafts in memory with the original File; do not invoke dynamic-action, upload or pre-insert for analysis until its deployed input/output and upload ownership are verified, to avoid duplicate persistence.
+- Keep analysis drafts in memory with the original File; dynamic-action receives only image Base64 and referenceMeasure (all labeled metadata, maximum 1000 characters) and exclusively owns uploads/inserts; validate its response and replace the local draft with its project_id without automatic POST retries.
+- Validate parts_data against the supplied engineering schema before unlocking drawings; render validated SVG primitives through React rather than injecting backend SVG markup, so reload uses persisted analysis safely.

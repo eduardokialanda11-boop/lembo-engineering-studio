@@ -20,6 +20,7 @@ export function hasExampleResults(project: LocalProject) {
 export function analysisState(project: LocalProject): AnalysisState {
   if (hasExampleResults(project)) return "example";
   if (project.isExample) return "waiting";
+  if (project.analysis) return "completed";
   if (project.status === "erro") return "error";
   if (project.remote && project.status === "em_analise") return "processing";
   // A status string alone is not proof of a technical result. No real result
@@ -29,13 +30,14 @@ export function analysisState(project: LocalProject): AnalysisState {
 
 export function canOpenStage(project: LocalProject, stage: string): stage is ProjectStage {
   if (!projectStages.some((item) => item.id === stage)) return false;
-  return stage === "geral" || stage === "analise" || stage === "historico" || hasExampleResults(project) || (Boolean(project.remote) && ["pecas", "didatica", "montagem"].includes(stage));
+  return stage === "geral" || stage === "analise" || stage === "historico" || hasExampleResults(project) || Boolean(project.analysis) || (Boolean(project.remote) && ["pecas", "didatica", "montagem"].includes(stage));
 }
 
 export function stageState(project: LocalProject, stage: ProjectStage) {
   if (stage === "geral") return project.imageUrl || project.thumb ? "Concluída" : "Pendente";
   if (stage === "historico") return "Disponível";
   if (hasExampleResults(project)) return "Exemplo disponível";
+  if (project.analysis) return project.analysis.analysis_status === "needs_more_information" ? "Requer confirmação" : "Resultado preliminar";
   if (stage === "analise" && analysisState(project) === "processing") return "Em andamento";
   if (stage === "analise" && analysisState(project) === "error") return "Requer atenção";
   return "Pendente";
@@ -45,4 +47,5 @@ export function validateAnalysisStart(project: LocalProject) {
   if (!project.imageUrl) throw new Error("Adicione uma imagem original antes de iniciar a análise.");
   if (project.isExample) throw new Error("Este é um projeto de exemplo. Crie um projeto com sua imagem para iniciar uma análise.");
   if (analysisState(project) === "processing") throw new Error("A análise deste projeto já está em andamento.");
+  if (project.analysis) throw new Error("Este projeto já possui uma análise salva. Crie uma nova referência para outra análise.");
 }

@@ -32,12 +32,12 @@ function Analysis() {
       </div>
       <div className="flex items-start gap-3 rounded-xl border border-electric/30 bg-electric/5 p-4 text-sm">
         <PlugZap className="mt-0.5 h-5 w-5 shrink-0 text-electric" />
-        <p className="text-primary"><strong>Aguardando conexão com o motor de análise.</strong> Esta tela exibirá o progresso e os resultados reais assim que a integração com o backend for concluída. Nenhum resultado é simulado.</p>
+        <p className="text-primary"><strong>Nenhum projeto selecionado.</strong> Acompanhe a análise na página do projeto. O processamento não informa progresso intermediário.</p>
       </div>
       <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
         <div className="space-y-4">
           <div className="relative overflow-hidden rounded-xl border bg-paper blueprint-grid shadow-card">
-            <div className="grid aspect-[4/3] place-items-center text-center text-muted-foreground"><div><ImageIcon className="mx-auto h-10 w-10" /><p className="mt-2 text-sm">Imagem original enviada</p></div></div>
+            <div className="grid aspect-[4/3] place-items-center text-center text-muted-foreground"><div><ImageIcon className="mx-auto h-10 w-10" /><p className="mt-2 text-sm">Nenhuma imagem selecionada</p></div></div>
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-transparent via-electric/15 to-transparent animate-scan" />
           </div>
           <div className="rounded-xl border bg-card p-5 shadow-card">

@@ -8,6 +8,8 @@ import { useProjects } from "@/components/lembo/ProjectsProvider";
 import { DeleteProjectDialog } from "@/components/lembo/DeleteProjectDialog";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { EngineeringDrawing } from "@/components/lembo/EngineeringDrawing";
+import { formatEngineeringDimension } from "@/lib/analysis-contract";
 import { RealProjectResults } from "@/components/lembo/RealProjectResults";
 import { pageMeta } from "@/lib/page-meta";
 import { StatusBadge } from "@/components/lembo/StatusBadge";
@@ -93,9 +95,11 @@ export function ProjectPage() {
           <div className="space-y-4 rounded-xl border bg-card p-4 shadow-card">
             <h3 className="text-sm font-semibold text-primary">Resultado da análise</h3>
             <dl className="grid grid-cols-2 gap-3 text-sm">
-              {!ready ? <p className="col-span-2 text-muted-foreground">Aguardando resultado da análise.</p> : [["Objeto", "Suporte em L com reforço"], ["Peças", `${demoParts.length}`], ["Vistas", "Frontal, lateral, superior"], ["Cotas pendentes", `${demoDims.filter((d) => d.kind === "unknown").length}`]].map(([k, v]) => <div key={k} className="rounded-md bg-muted/60 p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium text-primary">{v}</dd></div>)}
+              {p.analysis ? <><div className="col-span-2"><dt>Objeto</dt><dd>{p.analysis.object_summary}</dd></div><div><dt>Peças</dt><dd>{p.analysis.components.length}</dd></div><div><dt>Resultado</dt><dd>{p.analysis.analysis_status === "needs_more_information" ? "Requer informações adicionais" : "Preliminar"}</dd></div></> : !ready ? <p className="col-span-2 text-muted-foreground">Aguardando resultado da análise.</p> : [["Objeto", "Suporte em L com reforço"], ["Peças", `${demoParts.length}`], ["Vistas", "Frontal, lateral, superior"], ["Cotas pendentes", `${demoDims.filter((d) => d.kind === "unknown").length}`]].map(([k, v]) => <div key={k} className="rounded-md bg-muted/60 p-3"><dt className="text-xs text-muted-foreground">{k}</dt><dd className="font-medium text-primary">{v}</dd></div>)}
             </dl>
             <DimLegend compact />
+            {p.analysis && <ul className="space-y-2">{p.analysis.dimensions.map((dimension, i) => <li key={i} className="flex flex-wrap items-center gap-2 text-sm"><DimChip kind={dimension.source} /><span>{formatEngineeringDimension(dimension)}</span><span className="text-muted-foreground">{dimension.note}</span></li>)}</ul>}
+            {p.referenceMeasure && <div className="space-y-2 text-sm"><h3 className="font-semibold text-primary">Referência enviada</h3><p className="whitespace-pre-wrap break-words">{p.referenceMeasure}</p></div>}
             {!p.isExample && <><h3 className="text-sm font-semibold text-primary">Dimensões informadas (observadas)</h3>{p.dimensions.length ? <dl className="space-y-2">{p.dimensions.map((d, i) => <div key={i} className="flex flex-wrap items-center gap-2 text-sm"><DimChip kind="observed" /><dt className="break-words">{d.label}</dt><dd className="font-mono">{d.value} mm</dd></div>)}</dl> : <p className="text-sm text-muted-foreground">Nenhuma medida informada. Dimensões não determinadas permanecem desconhecidas.</p>}<h3 className="text-sm font-semibold text-primary">Observações adicionais</h3><p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{p.notes || "Nenhuma observação informada."}</p></>}
           </div>
         </TabsContent>
@@ -104,13 +108,13 @@ export function ProjectPage() {
           <h2 className="text-xl font-semibold text-primary">Análise de engenharia</h2>
           <div className="flex items-start gap-3 border-l-2 border-electric/30 py-2 pl-4" role="status">
             {state === "error" ? <TriangleAlert className="h-6 w-6 shrink-0 text-destructive" /> : state === "processing" ? <LoaderCircle className="h-6 w-6 shrink-0 animate-spin text-electric motion-reduce:animate-none" /> : <ScanEye className="h-6 w-6 shrink-0 text-electric" />}
-            <div className="space-y-2 text-sm"><p className="font-semibold text-primary">{ready ? "Resultado de exemplo" : state === "processing" ? "Análise em andamento" : state === "error" ? "Erro na análise" : "Aguardando análise"}</p><p className="text-muted-foreground">{ready ? "Conteúdo demonstrativo. Não representa uma análise realizada para fabricação." : state === "processing" ? "O Supabase informa que este projeto está em análise. Aguardando resultado técnico confirmado." : state === "error" ? "O projeto está marcado com erro no Supabase. Nenhum resultado foi liberado." : "Nenhum resultado técnico confirmado foi recebido."}</p>{!ready && <p className="text-muted-foreground">Integração de análise pendente: a função existente e seu formato de envio ainda não puderam ser identificados. Nenhum processamento será simulado.</p>}</div>
+            <div className="space-y-2 text-sm"><p className="font-semibold text-primary">{p.analysis ? "Análise preliminar salva" : ready ? "Resultado de exemplo" : state === "processing" ? "Análise em andamento" : state === "error" ? "Erro na análise" : "Aguardando análise"}</p><p className="text-muted-foreground">{p.analysis?.object_summary || (ready ? "Conteúdo demonstrativo. Não usar para fabricação." : "Nenhum resultado técnico confirmado foi recebido.")}</p>{p.analysis && <><ul className="space-y-2 text-dim-unknown">{p.analysis.unknowns.map((item, i) => <li key={i}>{item}</li>)}</ul><ul className="space-y-2 text-destructive">{p.analysis.safety_warnings.map((item, i) => <li key={i}>{item}</li>)}</ul><p className="text-muted-foreground">Resultado preliminar; não representa certificação nem liberação para fabricação.</p></>}</div>
           </div>
           <DimLegend compact />
-          {!ready && <p className="text-sm text-muted-foreground">Prancha, peças, explicações e montagem permanecem pendentes.</p>}
+          {!ready && !p.analysis && <p className="text-sm text-muted-foreground">Prancha, peças, explicações e montagem permanecem pendentes.</p>}
         </TabsContent>
 
-        <TabsContent value="prancha" className="mt-4">{ready ? <Prancha projectName={p.name} /> : <Empty />}</TabsContent>
+        <TabsContent value="prancha" className="mt-4">{p.analysis ? <EngineeringDrawing analysis={p.analysis} /> : ready ? <Prancha projectName={p.name} /> : <Empty />}</TabsContent>
 
         <TabsContent value="pecas" className="mt-4 grid gap-3 sm:grid-cols-2">
           {p.remote ? <div className="col-span-full"><RealProjectResults projectId={p.id} kind="pieces" /></div> : !ready && <div className="col-span-full"><Empty /></div>}

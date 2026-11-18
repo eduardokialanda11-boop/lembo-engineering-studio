@@ -2,9 +2,11 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectAnalysis } from "@/components/lembo/ProjectAnalysis";
 import type { LocalProject } from "@/lib/project-state";
+vi.mock("@tanstack/react-router", () => ({ useNavigate: () => vi.fn() }));
+vi.mock("@/components/lembo/ProjectsProvider", () => ({ useProjects: () => ({ acceptAnalysis: vi.fn() }) }));
 const start = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/integration", async (original) => ({ ...await original<typeof import("@/lib/integration")>(), analysisApi: { start } }));
-const project: LocalProject = { id: "real-project", name: "Peça", description: "", createdAt: "2026-11-18", status: "rascunho", isExample: false, imageUrl: "blob:original", dimensions: [], notes: "" };
+const project: LocalProject = { id: "real-project", name: "Peça", description: "", createdAt: "2026-11-18", status: "rascunho", isExample: false, imageUrl: "blob:original", originalFile: new File(["original"], "original.png", { type: "image/png" }), dimensions: [], notes: "" };
 afterEach(() => { cleanup(); vi.resetAllMocks(); });
 
 describe("Início de análise", () => {

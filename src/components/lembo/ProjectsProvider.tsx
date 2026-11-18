@@ -20,6 +20,7 @@ interface ProjectsContextValue {
   loadError: string;
   refreshProjects: () => Promise<void>;
   loadProject: (id: string) => Promise<LocalProject | null>;
+  acceptAnalysis: (draftId: string, project: LocalProject) => void;
 }
 const ProjectsContext = createContext<ProjectsContextValue | null>(null);
 
@@ -67,6 +68,13 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
   useEffect(() => () => { imageUrls.current.forEach((url) => URL.revokeObjectURL(url)); }, []);
   const notify = (text: string) => setNotices((existing) => [{ id: crypto.randomUUID(), text }, ...existing]);
   const update = (next: LocalProject[]) => { currentProjects.current = next; setProjects(next); };
+  const acceptAnalysis = (draftId: string, project: LocalProject) => {
+    const draft = currentProjects.current.find((item) => item.id === draftId);
+    update(currentProjects.current.filter((item) => item.id !== draftId));
+    setRemote((rows) => [project, ...rows.filter((item) => item.id !== project.id)]);
+    if (draft?.imageUrl) { URL.revokeObjectURL(draft.imageUrl); imageUrls.current.delete(draft.imageUrl); }
+    notify(`Análise de “${project.name}” salva no Supabase.`);
+  };
   const createProject: ProjectsContextValue["createProject"] = (input) => {
     validateProjectInput(input.name, input.dimensions);
     if (!input.imageUrl) throw new Error("Adicione uma imagem de referência.");
@@ -84,7 +92,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     if (project?.imageUrl) { URL.revokeObjectURL(project.imageUrl); imageUrls.current.delete(project.imageUrl); }
     notify(`Projeto “${project?.name}” eliminado desta sessão.`);
   };
-  return <ProjectsContext.Provider value={{ projects: [...remote, ...projects], createProject, deleteProject, query, setQuery, profileName, setProfileName, compact, setCompact, notices, loading, loadError, refreshProjects, loadProject, clearNotices: () => setNotices([]) }}>{children}</ProjectsContext.Provider>;
+  return <ProjectsContext.Provider value={{ projects: [...remote, ...projects], createProject, deleteProject, query, setQuery, profileName, setProfileName, compact, setCompact, notices, loading, loadError, refreshProjects, loadProject, acceptAnalysis, clearNotices: () => setNotices([]) }}>{children}</ProjectsContext.Provider>;
 }
 
 export function useProjects() {

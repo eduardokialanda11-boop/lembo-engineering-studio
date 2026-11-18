@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesInsert } from "@/integrations/supabase/types";
 import { validateImage } from "@/lib/project-state";
+import { analysisResponseSchema, maxAnalysisImageBytes } from "@/lib/analysis-contract";
 // Retained only for compatibility with older UI helpers. Core APIs never use it.
 export class NotConnectedError extends Error {
   constructor(feature: string) {
@@ -94,11 +95,50 @@ export interface AnalysisInput {
   additionalInstructions?: string;
 }
 export const analysisFunctionName = "dynamic-action";
+export function buildAnalysisReference(input: Omit<AnalysisInput, "image">) {
+  const text = [
+    `Nome informado: ${input.name.trim()}`,
+    input.description.trim() && `Descrição: ${input.description.trim()}`,
+    input.dimensions.filter((d) => d.label.trim() && d.value.trim()).map((d) => `Medida informada: ${d.label} = ${d.value} mm`).join("\n"),
+    input.referenceMeasure?.trim() && `Referência: ${input.referenceMeasure.trim()}`,
+    input.notes.trim() && `Observações: ${input.notes.trim()}`,
+    input.additionalInstructions?.trim() && `Instruções adicionais: ${input.additionalInstructions.trim()}`,
+  ].filter(Boolean).join("\n");
+  if (text.length > 1000) throw new Error("As informações somadas ultrapassam 1.000 caracteres, limite atual da análise. Reduza os textos; nenhuma informação foi descartada ou enviada.");
+  return text;
+}
+export async function encodeAnalysisImage(file: File) {
+  validateImage(file);
+  if (file.size === 0 || file.size > maxAnalysisImageBytes) throw new Error("A imagem deve ter até 8 MB e não pode estar vazia.");
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const jpeg = bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+  const png = bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71;
+  const webp = bytes[0] === 82 && bytes[1] === 73 && bytes[2] === 70 && bytes[3] === 70 && bytes[8] === 87 && bytes[9] === 69 && bytes[10] === 66 && bytes[11] === 80;
+  if (!jpeg && !png && !webp) throw new Error("A análise aceita somente imagens JPEG, PNG ou WEBP. BMP pode ser visualizado, mas precisa ser convertido antes da análise.");
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += 32768) binary += String.fromCharCode(...bytes.subarray(offset, offset + 32768));
+  return `data:${jpeg ? "image/jpeg" : png ? "image/png" : "image/webp"};base64,${btoa(binary)}`;
+}
 export const analysisApi = {
-  start: async (_input?: AnalysisInput): Promise<{ project_id: string }> => {
-    // Do not guess JSON vs multipart, field names, or upload ownership.
-    // No request, upload or insert is made until the deployed source is supplied.
-    throw new Error("A análise não foi enviada: falta confirmar o formato de entrada e saída de dynamic-action. Sua imagem e informações continuam nesta sessão; nenhum registro ou upload foi duplicado.");
+  start: async (input?: AnalysisInput) => {
+    if (!input) throw new Error("Adicione a imagem original para iniciar uma nova análise.");
+    const referenceMeasure = buildAnalysisReference(input);
+    const image = await encodeAnalysisImage(input.image);
+    await requireUser();
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) throw new Error("Sua sessão expirou. Entre novamente.");
+    // dynamic-action owns the ONLY upload and inserts. No retry of this POST.
+    const { data, error } = await supabase.functions.invoke(analysisFunctionName, { body: { image, referenceMeasure }, headers: { Authorization: `Bearer ${sessionData.session.access_token}` } });
+    if (error) {
+      let detail = "";
+      if (error.context instanceof Response) {
+        try { const result = await error.context.clone().json(); detail = typeof result.error === "string" ? result.error : ""; } catch { /* keep transport error */ }
+      }
+      throw new Error(`${detail || error.message || "Falha ao conectar à análise."} Antes de repetir, confira Meus projetos: uma falha de conexão pode ocorrer após o salvamento.`);
+    }
+    const result = analysisResponseSchema.safeParse(data);
+    if (!result.success) throw new Error("A análise retornou uma resposta incompleta ou inválida. Confira Meus projetos antes de repetir, pois o salvamento pode já ter ocorrido.");
+    return result.data;
   },
 };
 export const componentsApi = {
