@@ -1,4 +1,5 @@
 # LEMBO — Gestão de projetos
+- [x] Corrigir Novo projeto para analisar diretamente com dynamic-action, sem rascunho vazio, com bloqueio de duplicação, referência de medida e abertura do ID confirmado; 58 testes locais passaram e fluxo controlado conferido em computador e celular, sem validação autenticada real.
 - [x] Implementar APIs de consulta, rascunho independente e Storage existentes; retirar exemplos automáticos da conta e mostrar erros com nova tentativa. Escritas ainda não exercitadas na conta real.
 - [x] Conectar componentes e montagem a consultas reais, com estados vazios e nova tentativa, sem substituir dados por exemplos.
 - [x] Conectar dynamic-action ao contrato fornecido: JSON image em Base64 e referenceMeasure, upload/persistência exclusivos da função, retorno definitivo project_id e desenho real recuperável.
