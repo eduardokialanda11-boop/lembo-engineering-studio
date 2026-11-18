@@ -35,3 +35,4 @@ use the editor.
 - Brand logo comes from the original uploaded asset pointers in `src/assets/`; never redraw or recolor it.
 - Keep temporary frontend projects in an app-layout React provider, without browser persistence or backend calls, so navigation stays synchronized and reload discards the session.
 - Own project image object URLs in the shared provider after creation and revoke them on deletion or unmount to preserve previews without leaking memory.
+- Project-detail stage access is centralized in project-workflow; a backend status alone never unlocks technical results, and the analysis integration stays pending until the existing deployed contract is verified.
