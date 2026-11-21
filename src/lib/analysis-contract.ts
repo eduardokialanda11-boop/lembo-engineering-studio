@@ -61,7 +61,7 @@ export function validateSvgPath(d: string): boolean {
 
     const separator = d[position];
 
-    if (separator === "," || /\s/.test(separator)) {
+    if (separator === "," || (separator !== undefined && /\s/.test(separator))) {
       position++;
       continue;
     }
@@ -69,7 +69,7 @@ export function validateSvgPath(d: string): boolean {
     return false;
   }
 
-  if (tokens.length === 0 || !/^[Mm]$/.test(tokens[0])) {
+  if (!tokens[0] || !/^[Mm]$/.test(tokens[0])) {
     return false;
   }
 
@@ -102,8 +102,11 @@ export function validateSvgPath(d: string): boolean {
   let currentCommand: string | null = null;
 
   while (index < tokens.length) {
-    if (isCommand(tokens[index])) {
-      currentCommand = tokens[index];
+    const token = tokens[index];
+    if (token === undefined) return false;
+
+    if (isCommand(token)) {
+      currentCommand = token;
       index++;
 
       if (currentCommand === "Z" || currentCommand === "z") {
@@ -118,10 +121,11 @@ export function validateSvgPath(d: string): boolean {
 
     const command = currentCommand;
     const required = argsPerCommand[command];
+    if (required === undefined || required === 0) return false;
 
     const start = index;
 
-    while (index < tokens.length && !isCommand(tokens[index])) {
+    while (index < tokens.length && !isCommand(tokens[index] ?? "")) {
       const value = Number(tokens[index]);
 
       if (!Number.isFinite(value)) return false;
@@ -157,15 +161,16 @@ export function validateSvgPath(d: string): boolean {
   return currentCommand !== null || tokens[tokens.length - 1] === "Z" || tokens[tokens.length - 1] === "z";
 }
 
-export const dimensionSchema = z
+const dimensionObjectSchema = z
   .object({
     name: z.string().trim().min(1).max(100),
     value: z.number().finite().nonnegative().nullable(),
     unit: z.string().max(20),
     source: z.enum(measurementSources),
     note: z.string().max(500).optional().default(""),
-  })
-  .superRefine((dimension, context) => {
+  });
+
+function validateDimension(dimension: z.infer<typeof dimensionObjectSchema>, context: z.RefinementCtx) {
     if (dimension.source === "unknown" && dimension.value !== null) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
@@ -181,7 +186,9 @@ export const dimensionSchema = z
         path: ["value"],
       });
     }
-  });
+  }
+
+export const dimensionSchema = dimensionObjectSchema.superRefine(validateDimension);
 
 const pathSchema = z.object({
   d: z.string().min(1).max(100000).refine(validateSvgPath, "Caminho SVG estruturalmente inválido."),
@@ -199,13 +206,13 @@ const circleSchema = z.object({
   stroke_width: z.number().finite().positive().max(30),
 });
 
-const viewDimensionSchema = dimensionSchema.extend({
+const viewDimensionSchema = dimensionObjectSchema.extend({
   x1: coordinate,
   y1: coordinate,
   x2: coordinate,
   y2: coordinate,
   component_id: z.string().min(1).max(80).nullable().optional(),
-});
+}).superRefine(validateDimension);
 
 const calloutSchema = z.object({
   label: z.string().trim().min(1).max(100),
@@ -435,35 +442,35 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
   const legacy = value as Record<string, unknown>;
 
   if (
-    !Array.isArray(legacy.components) ||
-    !Array.isArray(legacy.assembly_steps) ||
-    !legacy.technical_drawing ||
-    typeof legacy.technical_drawing !== "object"
+    !Array.isArray(legacy["components"]) ||
+    !Array.isArray(legacy["assembly_steps"]) ||
+    !legacy["technical_drawing"] ||
+    typeof legacy["technical_drawing"] !== "object"
   ) {
     return undefined;
   }
 
-  const drawing = legacy.technical_drawing as Record<string, unknown>;
-  if (!Array.isArray(drawing.views)) return undefined;
+  const drawing = legacy["technical_drawing"] as Record<string, unknown>;
+  if (!Array.isArray(drawing["views"])) return undefined;
 
   // Recupera componentes e garante IDs únicos.
   const usedIds = new Set<string>();
   const originalIdCounts = new Map<string, number>();
 
-  legacy.components.forEach((item) => {
-    if (item && typeof item === "object" && typeof (item as Record<string, unknown>).component_id === "string") {
-      const id = (item as Record<string, unknown>).component_id as string;
+  legacy["components"].forEach((item) => {
+    if (item && typeof item === "object" && typeof (item as Record<string, unknown>)["component_id"] === "string") {
+      const id = (item as Record<string, unknown>)["component_id"] as string;
       originalIdCounts.set(id, (originalIdCounts.get(id) ?? 0) + 1);
     }
   });
 
   const oldIdToNewId = new Map<string, string>();
 
-  const components = legacy.components.map((item, index) => {
+  const components = legacy["components"].map((item, index) => {
     if (!item || typeof item !== "object") return item;
 
     const component = item as Record<string, unknown>;
-    const oldId = typeof component.component_id === "string" ? component.component_id : "";
+    const oldId = typeof component["component_id"] === "string" ? component["component_id"] : "";
 
     let newId = oldId;
 
@@ -485,21 +492,21 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
       ...component,
       component_id: newId,
       name:
-        typeof component.name === "string" && component.name.trim() ? component.name.trim() : `Componente ${index + 1}`,
+        typeof component["name"] === "string" && component["name"].trim() ? component["name"].trim() : `Componente ${index + 1}`,
       quantity:
-        typeof component.quantity === "number" && Number.isInteger(component.quantity) && component.quantity > 0
-          ? component.quantity
+        typeof component["quantity"] === "number" && Number.isInteger(component["quantity"]) && component["quantity"] > 0
+          ? component["quantity"]
           : 1,
-      description: typeof component.description === "string" ? component.description : "",
-      technical_description: typeof component.technical_description === "string" ? component.technical_description : "",
-      image_emoji: typeof component.image_emoji === "string" ? component.image_emoji : "",
-      dimensions: Array.isArray(component.dimensions) ? component.dimensions : [],
+      description: typeof component["description"] === "string" ? component["description"] : "",
+      technical_description: typeof component["technical_description"] === "string" ? component["technical_description"] : "",
+      image_emoji: typeof component["image_emoji"] === "string" ? component["image_emoji"] : "",
+      dimensions: Array.isArray(component["dimensions"]) ? component["dimensions"] : [],
     };
   });
 
   const validComponentIds = new Set(
     components
-      .map((item) => (item && typeof item === "object" ? (item as Record<string, unknown>).component_id : undefined))
+      .map((item) => (item && typeof item === "object" ? (item as Record<string, unknown>)["component_id"] : undefined))
       .filter((id): id is string => typeof id === "string"),
   );
 
@@ -510,9 +517,9 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
     if (!item || typeof item !== "object") return;
 
     const component = item as Record<string, unknown>;
-    if (typeof component.name !== "string") return;
+    if (typeof component["name"] !== "string") return;
 
-    const name = normalizeLegacyName(component.name);
+    const name = normalizeLegacyName(component["name"]);
     nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
   });
 
@@ -522,12 +529,12 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
     if (!item || typeof item !== "object") return;
 
     const component = item as Record<string, unknown>;
-    if (typeof component.name !== "string" || typeof component.component_id !== "string") return;
+    if (typeof component["name"] !== "string" || typeof component["component_id"] !== "string") return;
 
-    const name = normalizeLegacyName(component.name);
+    const name = normalizeLegacyName(component["name"]);
 
     if (nameCounts.get(name) === 1) {
-      componentIdByName.set(name, component.component_id);
+      componentIdByName.set(name, component["component_id"]);
     }
   });
 
@@ -535,36 +542,37 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
   const seenKinds = new Set<string>();
   const views: Record<string, unknown>[] = [];
 
-  drawing.views.forEach((item) => {
+  drawing["views"].forEach((item) => {
     if (!item || typeof item !== "object") return;
 
     const view = item as Record<string, unknown>;
 
+    const parsedKind = z.enum(viewKinds).safeParse(view["kind"]);
     const kind =
-      typeof view.kind === "string" && (viewKinds as readonly string[]).includes(view.kind)
-        ? view.kind
-        : typeof view.name === "string"
-          ? inferLegacyViewKind(view.name)
+      parsedKind.success
+        ? parsedKind.data
+        : typeof view["name"] === "string"
+          ? inferLegacyViewKind(view["name"])
           : undefined;
 
     if (!kind || seenKinds.has(kind)) return;
 
     seenKinds.add(kind);
 
-    const isRequested = view.status === "requested";
+    const isRequested = view["status"] === "requested";
 
-    const paths = isRequested ? [] : Array.isArray(view.paths) ? view.paths : [];
+    const paths = isRequested ? [] : Array.isArray(view["paths"]) ? view["paths"] : [];
 
-    const circles = isRequested ? [] : Array.isArray(view.circles) ? view.circles : [];
+    const circles = isRequested ? [] : Array.isArray(view["circles"]) ? view["circles"] : [];
 
     const dimensions = isRequested
       ? []
-      : Array.isArray(view.dimensions)
-        ? view.dimensions.map((item) => {
+      : Array.isArray(view["dimensions"])
+        ? view["dimensions"].map((item) => {
             if (!item || typeof item !== "object") return item;
 
             const dimension = item as Record<string, unknown>;
-            const oldId = dimension.component_id;
+            const oldId = dimension["component_id"];
 
             return {
               ...dimension,
@@ -575,12 +583,12 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
 
     const callouts = isRequested
       ? []
-      : Array.isArray(view.callouts)
-        ? view.callouts.map((item) => {
+      : Array.isArray(view["callouts"])
+        ? view["callouts"].map((item) => {
             if (!item || typeof item !== "object") return item;
 
             const callout = item as Record<string, unknown>;
-            const oldId = callout.component_id;
+            const oldId = callout["component_id"];
 
             return {
               ...callout,
@@ -593,8 +601,8 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
 
     const status = isRequested
       ? "requested"
-      : view.status === "partial" || view.status === "available"
-        ? view.status
+      : view["status"] === "partial" || view["status"] === "available"
+        ? view["status"]
         : hasGeometry
           ? "partial"
           : "requested";
@@ -602,9 +610,9 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
     views.push({
       ...view,
       kind,
-      name: typeof view.name === "string" && view.name.trim() ? view.name : viewDisplayNames[kind],
+      name: typeof view["name"] === "string" && view["name"].trim() ? view["name"] : viewDisplayNames[kind],
       status,
-      description: typeof view.description === "string" ? view.description : "Vista recuperada de um projeto anterior.",
+      description: typeof view["description"] === "string" ? view["description"] : "Vista recuperada de um projeto anterior.",
       paths: status === "requested" ? [] : paths,
       circles: status === "requested" ? [] : circles,
       dimensions: status === "requested" ? [] : dimensions,
@@ -629,23 +637,23 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
   }
 
   views.sort(
-    (a, b) => viewKinds.indexOf(a.kind as EngineeringViewKind) - viewKinds.indexOf(b.kind as EngineeringViewKind),
+    (a, b) => viewKinds.indexOf(a["kind"] as EngineeringViewKind) - viewKinds.indexOf(b["kind"] as EngineeringViewKind),
   );
 
   // Recupera etapas e reconstrói vínculos seguros.
-  const assemblySteps = legacy.assembly_steps.map((item, index) => {
+  const assemblySteps = legacy["assembly_steps"].map((item, index) => {
     if (!item || typeof item !== "object") return item;
 
     const step = item as Record<string, unknown>;
 
-    const componentName = typeof step.component_name === "string" ? step.component_name : "";
+    const componentName = typeof step["component_name"] === "string" ? step["component_name"] : "";
 
     let componentIds: string[] = [];
 
-    if (Array.isArray(step.component_ids)) {
+    if (Array.isArray(step["component_ids"])) {
       componentIds = [
         ...new Set(
-          step.component_ids
+          step["component_ids"]
             .filter((id): id is string => typeof id === "string")
             .map((id) => oldIdToNewId.get(id))
             .filter((id): id is string => typeof id === "string" && validComponentIds.has(id)),
@@ -664,36 +672,36 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
       step_number: index + 1,
       component_ids: componentIds,
       component_name: componentName,
-      title: typeof step.title === "string" && step.title.trim() ? step.title : `Etapa ${index + 1}`,
+      title: typeof step["title"] === "string" && step["title"].trim() ? step["title"] : `Etapa ${index + 1}`,
       instruction:
-        typeof step.instruction === "string" && step.instruction.trim()
-          ? step.instruction
+        typeof step["instruction"] === "string" && step["instruction"].trim()
+          ? step["instruction"]
           : "Instrução não disponível no registro original. Revisão necessária.",
-      visual_type: ["illustration", "diagram", "text", "reference"].includes(String(step.visual_type))
-        ? step.visual_type
+      visual_type: ["illustration", "diagram", "text", "reference"].includes(String(step["visual_type"]))
+        ? step["visual_type"]
         : "text",
-      visual_reference: typeof step.visual_reference === "string" ? step.visual_reference : null,
+      visual_reference: typeof step["visual_reference"] === "string" ? step["visual_reference"] : null,
     };
   });
 
   const migrated = {
     ...legacy,
-    title: typeof legacy.title === "string" && legacy.title.trim() ? legacy.title : "Projeto recuperado",
-    object_summary: typeof legacy.object_summary === "string" ? legacy.object_summary : "",
-    analysis_status: legacy.analysis_status === "needs_more_information" ? "needs_more_information" : "preliminary",
-    reference_measure: typeof legacy.reference_measure === "string" ? legacy.reference_measure : null,
-    dimensions: Array.isArray(legacy.dimensions) ? legacy.dimensions : [],
+    title: typeof legacy["title"] === "string" && legacy["title"].trim() ? legacy["title"] : "Projeto recuperado",
+    object_summary: typeof legacy["object_summary"] === "string" ? legacy["object_summary"] : "",
+    analysis_status: legacy["analysis_status"] === "needs_more_information" ? "needs_more_information" : "preliminary",
+    reference_measure: typeof legacy["reference_measure"] === "string" ? legacy["reference_measure"] : null,
+    dimensions: Array.isArray(legacy["dimensions"]) ? legacy["dimensions"] : [],
     components,
     technical_drawing: {
       ...drawing,
-      title: typeof drawing.title === "string" && drawing.title.trim() ? drawing.title : "Prancha técnica",
-      scale: typeof drawing.scale === "string" ? drawing.scale : "Não definida",
+      title: typeof drawing["title"] === "string" && drawing["title"].trim() ? drawing["title"] : "Prancha técnica",
+      scale: typeof drawing["scale"] === "string" ? drawing["scale"] : "Não definida",
       views,
-      notes: Array.isArray(drawing.notes) ? drawing.notes : [],
+      notes: Array.isArray(drawing["notes"]) ? drawing["notes"] : [],
     },
     assembly_steps: assemblySteps,
-    unknowns: Array.isArray(legacy.unknowns) ? legacy.unknowns : [],
-    safety_warnings: Array.isArray(legacy.safety_warnings) ? legacy.safety_warnings : [],
+    unknowns: Array.isArray(legacy["unknowns"]) ? legacy["unknowns"] : [],
+    safety_warnings: Array.isArray(legacy["safety_warnings"]) ? legacy["safety_warnings"] : [],
   };
 
   const result = analysisSchema.safeParse(migrated);
@@ -702,11 +710,11 @@ export function parseSavedAnalysis(value: unknown): EngineeringAnalysis | undefi
 }
 
 export function formatEngineeringDimension(dimension: EngineeringDimension) {
-  if (dimension.source === "unknown" || dimension.value === null) {
-    return `${dimension.name}: A DEFINIR`;
+  if (dimension["source"] === "unknown" || dimension["value"] === null) {
+    return `${dimension["name"]}: A DEFINIR`;
   }
 
-  const prefix = dimension.source === "estimated" ? "≈ " : "";
+  const prefix = dimension["source"] === "estimated" ? "≈ " : "";
 
-  return `${dimension.name}: ${prefix}${dimension.value.toLocaleString("pt-BR")} ${dimension.unit}`;
+  return `${dimension["name"]}: ${prefix}${dimension["value"].toLocaleString("pt-BR")} ${dimension["unit"]}`;
 }

@@ -1,10 +1,12 @@
 import { dimKindMeta, type DimKind } from "@/lib/demo-data";
+import type { MeasurementSource } from "@/lib/analysis-contract";
 import { cn } from "@/lib/utils";
 export const dimStroke: Record<DimKind, string> = { observed: "stroke-dim-observed", calculated: "stroke-dim-calculated", estimated: "stroke-dim-estimated", unknown: "stroke-dim-unknown" };
 export const dimFill: Record<DimKind, string> = { observed: "fill-dim-observed", calculated: "fill-dim-calculated", estimated: "fill-dim-estimated", unknown: "fill-dim-unknown" };
 export const dimText: Record<DimKind, string> = { observed: "text-dim-observed", calculated: "text-dim-calculated", estimated: "text-dim-estimated", unknown: "text-dim-unknown" };
 const dimBorder: Record<DimKind, string> = { observed: "border-dim-observed", calculated: "border-dim-calculated", estimated: "border-dim-estimated border-dashed", unknown: "border-dim-unknown border-dotted" };
-export function DimChip({ kind }: { kind: DimKind }) {
+export function DimChip({ kind: source }: { kind: MeasurementSource }) {
+  const kind: DimKind = source === "provided" ? "observed" : source;
   return <span className={cn("inline-flex rounded border-2 px-1.5 font-mono text-[10px] font-semibold", dimBorder[kind], dimText[kind])}>{dimKindMeta[kind].short}</span>;
 }
 export function DimLegend({ compact }: { compact?: boolean }) {

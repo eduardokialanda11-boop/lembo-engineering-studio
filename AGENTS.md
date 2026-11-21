@@ -39,3 +39,5 @@ use the editor.
 - Route all data calls through integration.ts and paginate lists; account views never seed demo rows, and private project images use renewable signed URLs because the existing bucket is private.
 - New Project submits the original File directly to analysisApi.start without creating a draft; existing analysis drafts stay in memory. dynamic-action receives only image Base64 and referenceMeasure (all labeled metadata, maximum 1000 characters) and exclusively owns uploads/inserts; register the validated result under its project_id and never automatically retry the POST or resubmit after a confirmed save.
 - Validate parts_data against the supplied engineering schema before unlocking drawings; render validated SVG primitives through React rather than injecting backend SVG markup, so reload uses persisted analysis safely.
+
+- Extend the base dimension object before applying its shared refinement to both standalone measures and drawing dimensions, because Zod effects cannot be extended and both must enforce the same value rules.
