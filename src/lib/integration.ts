@@ -25,6 +25,8 @@ async function requireUser() {
 }
 
 export const imageBucket = "project-images";
+// Short-lived links limit access after sign-out; views request fresh links when reopened.
+export const signedImageTtlSeconds = 300;
 export async function resolveProjectImage(value: string): Promise<string> {
   if (!value) return "";
   const base = new URL(import.meta.env['VITE_SUPABASE_URL']);
@@ -38,7 +40,7 @@ export async function resolveProjectImage(value: string): Promise<string> {
     path = decodeURIComponent(match[1]);
   }
   path = path.replace(/^project-images\//, "");
-  const { data, error } = await supabase.storage.from(imageBucket).createSignedUrl(path, 3600);
+  const { data, error } = await supabase.storage.from(imageBucket).createSignedUrl(path, signedImageTtlSeconds);
   if (error || !data?.signedUrl) throw new Error(`Não foi possível abrir a imagem privada: ${error?.message ?? "endereço indisponível"}`);
   return data.signedUrl;
 }
