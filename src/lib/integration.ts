@@ -99,7 +99,7 @@ export interface AnalysisInput {
 export const analysisFunctionName = "dynamic-action";
 export function buildAnalysisReference(input: Omit<AnalysisInput, "image">) {
   const text = [
-    `Nome informado: ${input.name.trim()}`,
+    input.name.trim() && `Nome informado: ${input.name.trim()}`,
     input.description.trim() && `Descrição: ${input.description.trim()}`,
     input.dimensions.filter((d) => d.label.trim() && d.value.trim()).map((d) => `Medida informada: ${d.label} = ${d.value} mm`).join("\n"),
     input.referenceMeasure?.trim() && `Referência: ${input.referenceMeasure.trim()}`,

@@ -13,9 +13,9 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
         <div className="relative max-w-md">
           <p className="font-mono text-xs uppercase tracking-[0.25em] text-sky">Engenharia · IA · Precisão</p>
           <h2 className="mt-4 text-4xl font-bold leading-tight">Da fotografia à prancha técnica 2D.</h2>
-          <p className="mt-4 text-primary-foreground/75">Transforme fotografias, esboços e desenhos em pranchas mecânicas profissionais, com explicação didática para fabricar, montar e instalar.</p>
+          <p className="mt-4 text-primary-foreground/75">Transforme fotografias, esboços e desenhos em documentação técnica 2D assistida por IA e guia visual de montagem.</p>
           <ul className="mt-8 space-y-3 text-sm">
-            {[[ScanEye, "Interpretação visual de objetos"], [Ruler, "Cotas com nível de confiabilidade"], [Cpu, "Orientação para fabricação e montagem"]].map(([I, t]) => {
+            {[[ScanEye, "Interpretação visual de objetos"], [Ruler, "Cotas com nível de confiabilidade"], [Cpu, "Guia visual de montagem"]].map(([I, t]) => {
               const Icon = I as typeof Cpu;
               return <li key={t as string} className="flex items-center gap-3"><span className="grid h-8 w-8 place-items-center rounded-md bg-electric/20 text-sky"><Icon className="h-4 w-4" /></span>{t as string}</li>;
             })}

@@ -21,12 +21,9 @@ function fillForm() {
   render(<NewProject />);
   const image = new File(["original"], "original.png", { type: "image/png" });
   fireEvent.change(screen.getByLabelText("Selecionar imagem de referência"), { target: { files: [image] } });
-  fireEvent.change(screen.getByLabelText("Nome do projeto"), { target: { value: "Suporte" } });
-  fireEvent.change(screen.getByLabelText("Descrição"), { target: { value: "Suporte de parede" } });
-  fireEvent.change(screen.getByLabelText("Nome da medida 1"), { target: { value: "Largura" } });
-  fireEvent.change(screen.getByLabelText("Valor da medida 1 em mm"), { target: { value: "120" } });
-  fireEvent.change(screen.getByLabelText("Referência de medida (opcional)"), { target: { value: "Altura total 80 mm" } });
-  fireEvent.change(screen.getByLabelText("Observações adicionais"), { target: { value: "Confirmar furos" } });
+  fireEvent.change(screen.getByLabelText(/Nome do projeto/), { target: { value: "Suporte" } });
+  fireEvent.change(screen.getByLabelText(/Descrição/), { target: { value: "Suporte de parede" } });
+  fireEvent.change(screen.getByLabelText(/Observações adicionais/), { target: { value: "Confirmar furos" } });
   return image;
 }
 
@@ -35,9 +32,9 @@ describe("Novo projeto: análise direta", () => {
     const image = fillForm();
     fireEvent.submit(screen.getByRole("button", { name: "Analisar e gerar projeto técnico" }).closest("form") as HTMLFormElement);
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/app/projetos/$id", params: { id: responseFixture.project_id } }));
-    expect(mocks.start).toHaveBeenCalledExactlyOnceWith({ image, name: "Suporte", description: "Suporte de parede", dimensions: [{ label: "Largura", value: "120" }], referenceMeasure: "Altura total 80 mm", notes: "Confirmar furos" });
+    expect(mocks.start).toHaveBeenCalledExactlyOnceWith({ image, name: "Suporte", description: "Suporte de parede", dimensions: [], notes: "Confirmar furos" });
     expect(mocks.create).not.toHaveBeenCalled();
-    expect(mocks.accept).toHaveBeenCalledWith(responseFixture.project_id, expect.objectContaining({ analysis: responseFixture.analysis, remote: true, referenceMeasure: "Nome informado: Suporte\nDescrição: Suporte de parede\nMedida informada: Largura = 120 mm\nReferência: Altura total 80 mm\nObservações: Confirmar furos" }));
+    expect(mocks.accept).toHaveBeenCalledWith(responseFixture.project_id, expect.objectContaining({ analysis: responseFixture.analysis, remote: true, referenceMeasure: "Nome informado: Suporte\nDescrição: Suporte de parede\nObservações: Confirmar furos" }));
   });
   it("bloqueia envios duplicados e não exibe resultado antes da confirmação", async () => {
     let finish: ((value: typeof responseFixture) => void) | undefined;
@@ -47,7 +44,7 @@ describe("Novo projeto: análise direta", () => {
     fireEvent.submit(form); fireEvent.submit(form);
     expect(mocks.start).toHaveBeenCalledTimes(1);
     expect(mocks.accept).not.toHaveBeenCalled(); expect(mocks.navigate).not.toHaveBeenCalled();
-    expect(screen.getByLabelText("Nome do projeto")).toBeDisabled();
+    expect(screen.getByLabelText(/Nome do projeto/)).toBeDisabled();
     finish?.(responseFixture);
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledTimes(1));
   });
@@ -57,7 +54,7 @@ describe("Novo projeto: análise direta", () => {
     fireEvent.click(button);
     await screen.findByRole("alert");
     expect(mocks.start).toHaveBeenCalledTimes(1); expect(mocks.accept).not.toHaveBeenCalled();
-    expect(screen.getByLabelText("Nome do projeto")).toHaveValue("Suporte");
+    expect(screen.getByLabelText(/Nome do projeto/)).toHaveValue("Suporte");
     fireEvent.click(button);
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledTimes(1));
     expect(mocks.start).toHaveBeenCalledTimes(2);
@@ -77,9 +74,14 @@ describe("Novo projeto: análise direta", () => {
     expect(mocks.accept).toHaveBeenCalledWith(responseFixture.project_id, expect.objectContaining({ analysis: responseFixture.analysis }));
     expect(mocks.start).toHaveBeenCalledTimes(1);
   });
-  it("bloqueia medidas incompletas antes da chamada", async () => {
-    fillForm(); fireEvent.change(screen.getByLabelText("Valor da medida 1 em mm"), { target: { value: "" } });
-    fireEvent.submit(screen.getByRole("button", { name: "Analisar e gerar projeto técnico" }).closest("form") as HTMLFormElement);
-    await screen.findByRole("alert"); expect(mocks.start).not.toHaveBeenCalled();
+  it("inicia a análise somente com a imagem, sem nome nem medidas", async () => {
+    render(<NewProject />);
+    const image = new File(["original"], "original.png", { type: "image/png" });
+    fireEvent.change(screen.getByLabelText("Selecionar imagem de referência"), { target: { files: [image] } });
+    expect(screen.queryByLabelText("Nome da medida 1")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Analisar e gerar projeto técnico" }));
+    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledTimes(1));
+    expect(mocks.start).toHaveBeenCalledExactlyOnceWith({ image, name: "", description: "", dimensions: [], notes: "" });
+    expect(mocks.accept).toHaveBeenCalledWith(responseFixture.project_id, expect.objectContaining({ name: responseFixture.analysis.title, referenceMeasure: "" }));
   });
 });

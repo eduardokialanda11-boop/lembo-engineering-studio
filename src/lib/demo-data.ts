@@ -26,9 +26,9 @@ export const demoProjects: DemoProject[] = [
 ];
 
 export const dimKindMeta: Record<DimKind, { label: string; short: string; desc: string }> = {
-  observed: { label: "Observada", short: "OBS", desc: "Lida diretamente na imagem ou informada pelo usuário." },
+  observed: { label: "Observada", short: "OBS", desc: "Lida diretamente na imagem." },
   calculated: { label: "Calculada", short: "CALC", desc: "Derivada matematicamente de outras medidas conhecidas." },
-  estimated: { label: "Estimada", short: "EST", desc: "Aproximação por proporção. Não é medida exata — confirmar antes de fabricar." },
+  estimated: { label: "Estimada", short: "EST", desc: "Aproximação por proporção. Não é medida exata — confirmar antes de usar." },
   unknown: { label: "Desconhecida", short: "?", desc: "Não pôde ser determinada. Necessita confirmação do usuário." },
 };
 
