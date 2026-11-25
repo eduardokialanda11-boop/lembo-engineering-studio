@@ -14,6 +14,61 @@ export type Database = {
   }
   public: {
     Tables: {
+      assembly_step_components: {
+        Row: {
+          assembly_step_id: string
+          component_id: string
+          component_order: number | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          project_id: string
+          role: string | null
+        }
+        Insert: {
+          assembly_step_id: string
+          component_id: string
+          component_order?: number | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          project_id: string
+          role?: string | null
+        }
+        Update: {
+          assembly_step_id?: string
+          component_id?: string
+          component_order?: number | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          project_id?: string
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assembly_component_project_fk"
+            columns: ["component_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id", "project_id"]
+          },
+          {
+            foreignKeyName: "assembly_step_components_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assembly_step_project_fk"
+            columns: ["assembly_step_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_steps"
+            referencedColumns: ["id", "project_id"]
+          },
+        ]
+      }
       assembly_steps: {
         Row: {
           component_name: string
@@ -27,6 +82,7 @@ export type Database = {
           step_type: string | null
           title: string
           tools_required: Json | null
+          visual_data: Json | null
           visual_reference: string | null
           visual_type: string | null
         }
@@ -42,6 +98,7 @@ export type Database = {
           step_type?: string | null
           title: string
           tools_required?: Json | null
+          visual_data?: Json | null
           visual_reference?: string | null
           visual_type?: string | null
         }
@@ -57,6 +114,7 @@ export type Database = {
           step_type?: string | null
           title?: string
           tools_required?: Json | null
+          visual_data?: Json | null
           visual_reference?: string | null
           visual_type?: string | null
         }
@@ -135,6 +193,66 @@ export type Database = {
           },
         ]
       }
+      project_dimensions: {
+        Row: {
+          component_id: string | null
+          created_at: string | null
+          geometry_reference: Json | null
+          id: string
+          label: string
+          measurement_source: string
+          project_id: string
+          unit: string | null
+          updated_at: string | null
+          validation_status: string
+          value: number | null
+          view_name: string | null
+        }
+        Insert: {
+          component_id?: string | null
+          created_at?: string | null
+          geometry_reference?: Json | null
+          id?: string
+          label: string
+          measurement_source?: string
+          project_id: string
+          unit?: string | null
+          updated_at?: string | null
+          validation_status?: string
+          value?: number | null
+          view_name?: string | null
+        }
+        Update: {
+          component_id?: string | null
+          created_at?: string | null
+          geometry_reference?: Json | null
+          id?: string
+          label?: string
+          measurement_source?: string
+          project_id?: string
+          unit?: string | null
+          updated_at?: string | null
+          validation_status?: string
+          value?: number | null
+          view_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_dimensions_component_project_fk"
+            columns: ["component_id", "project_id"]
+            isOneToOne: false
+            referencedRelation: "components"
+            referencedColumns: ["id", "project_id"]
+          },
+          {
+            foreignKeyName: "project_dimensions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           created_at: string | null
@@ -176,7 +294,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      lembo_save_analysis: {
+        Args: {
+          p_assembly_steps?: Json
+          p_components?: Json
+          p_dimensions?: Json
+          p_project: Json
+          p_step_components?: Json
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
